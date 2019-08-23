@@ -4,7 +4,26 @@
  * and open the template in the editor.
  */
 package lexer;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -16,9 +35,51 @@ public class view extends javax.swing.JFrame {
      * Creates new form view
      */
     Lexer_Generator lGen;
+    int returnVal;
+    Map<String,String> symbolsTable;
+    Path outFile;
+    ArrayList<String> lines = new ArrayList<String>();
+    int finalColumn;
     public view() {
         initComponents();
-       jLabel1.setText(":p");
+        jLabel1.setText(":p");
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        symbolsTable = new HashMap();
+        symbolsTable.put(".","POINT");
+        symbolsTable.put("+","PLUS");
+        symbolsTable.put("-","MINUS");
+        symbolsTable.put("*","MULT");
+        symbolsTable.put("/","DIV");
+        symbolsTable.put("%","MOD");
+        symbolsTable.put("<","LT");
+        symbolsTable.put("<=","LE");
+        symbolsTable.put(">","GT");
+        symbolsTable.put(">=","GE");
+        symbolsTable.put("=","EQUAL");
+        symbolsTable.put("==","EQUAL_TO");
+        symbolsTable.put("!=","DIF");
+        symbolsTable.put("!","NOT");
+        symbolsTable.put(";","SEMI_COL");
+        symbolsTable.put("&&","AND");
+        symbolsTable.put("||","OR");
+        symbolsTable.put("|","PIPE");
+        symbolsTable.put("&","AMPERSON");
+        symbolsTable.put(",","COMA");
+        symbolsTable.put("\\[","OPEN_BR");
+        symbolsTable.put("\\]","CLOSE_BR");
+        symbolsTable.put("\\(","OPEN_PARENT");
+        symbolsTable.put("\\)","CLOSE_PARENT");
+        symbolsTable.put("[]","BRAKETS");
+        symbolsTable.put("()","PARENTHESIS");
+        symbolsTable.put("\\{","OPEN_STAPE");
+        symbolsTable.put("\\}","CLOSE_STAPE");
+        symbolsTable.put("{}","STAPLES");
+        symbolsTable.put("@","AT");
+        symbolsTable.put("#","HASTAG");
+        symbolsTable.put("##","DOUBLE_HASTAG");
+        finalColumn = 0;
+        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+        this.setResizable(false);
     }
 
     /**
@@ -38,10 +99,15 @@ public class view extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jButton1.setText("Generate Lexer");
+        jButton1.setText("Analyze File");
         jButton1.setFocusPainted(false);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
-        jButton2.setText("Analyze File");
+        jButton2.setText("Generate Lexer");
         jButton2.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jButton2.setFocusPainted(false);
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -78,6 +144,12 @@ public class view extends javax.swing.JFrame {
             }
         });
         jScrollPane1.setViewportView(jTable1);
+        if (jTable1.getColumnModel().getColumnCount() > 0) {
+            jTable1.getColumnModel().getColumn(0).setResizable(false);
+            jTable1.getColumnModel().getColumn(0).setPreferredWidth(-20);
+            jTable1.getColumnModel().getColumn(1).setResizable(false);
+            jTable1.getColumnModel().getColumn(2).setResizable(false);
+        }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -88,11 +160,11 @@ public class view extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(486, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -113,18 +185,96 @@ public class view extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        File tempFile = new File("C:/Users/diego/Documents/NetBeansProjects/Lexer/src/lexer/Analizer.java");
+        File tempFile = new File("C:\\Users\\diego\\Documents\\NetBeansProjects\\Lexer\\src\\lexer\\Analyzer.java");
         boolean exists = tempFile.exists();
         if (exists) {
             tempFile.delete();
             lGen = new Lexer_Generator("C:/Users/diego/Documents/NetBeansProjects/Lexer/src/lexer/Lexer.flex");
             lGen.GenerateLexer();
+            jLabel1.setText("NEW RULES ADDED");
         }
         else{
             lGen = new Lexer_Generator("C:/Users/diego/Documents/NetBeansProjects/Lexer/src/lexer/Lexer.flex");
             lGen.GenerateLexer();
+            jLabel1.setText("RULES ADDED");
         }
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        JFileChooser flc = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("SQL or TEXT files", "sql","txt");
+        flc.setFileFilter(filter);
+        returnVal = flc.showOpenDialog(null);
+        if(returnVal == JFileChooser.APPROVE_OPTION){
+            File fld = flc.getSelectedFile();
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader(fld));
+                Analyzer lexer = new Analyzer(reader);
+                String line = "";
+                File filePath = new File("C:\\Users\\diego\\Documents\\NetBeansProjects\\Lexer\\src\\lexer\\Lexer.out");
+                boolean fileEX = filePath.exists();
+                if(fileEX){
+                    filePath.delete();
+                    outFile = Paths.get("C:\\Users\\diego\\Documents\\NetBeansProjects\\Lexer\\src\\lexer\\Lexer.out");
+                    Files.createFile(outFile);
+                }
+                else{
+                    outFile = Paths.get("C:\\Users\\diego\\Documents\\NetBeansProjects\\Lexer\\src\\lexer\\Lexer.out");
+                    Files.createFile(outFile);
+                }
+                do{
+                    Tokens token = lexer.yylex();
+                    if(token == null){
+                        //return EOF
+                    Files.write(outFile, lines,StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+                    lines.clear();
+                   Runtime.getRuntime().exec("explorer.exe /open, "+outFile);
+                    return;
+                    }
+                    else{
+                        switch(token){
+                            //escribir el .out
+                            case RESERVADA:
+                               finalColumn = finalColumn + lexer.yylength();
+                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: RESERVADA, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = 0;
+                                break;
+                            case PUNTUACION:
+                               finalColumn = finalColumn + lexer.yylength();
+                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: PUNTUACION, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = 0;
+                                break;
+                            case ENTERO:
+                               finalColumn = finalColumn + lexer.yylength();
+                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: ENTERO, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = 0;
+                                break;
+                            case IDENTIFICADOR:
+                               finalColumn = finalColumn + lexer.yylength();
+                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: IDENTIFICADOR, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = 0;                                
+                                break;
+                            case ErrorToken:
+                               finalColumn = finalColumn + lexer.yylength();
+                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: ERROR TOKEN NOT SPECIFIED, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = 0; 
+                                break;
+                            case ErrorLINEA:
+                               finalColumn = finalColumn + lexer.yylength();
+                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: ERROR COMMENT NOT FINALIZED, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = 0;                                 
+                               break;
+                        }
+                    }                    
+                }while(true);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(view.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(view.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
