@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,9 +24,8 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-/**
- *
- * @author Andres Diaz
+/*
+ /* @author Andres Diaz
  */
 public class view extends javax.swing.JFrame {
 
@@ -40,6 +38,8 @@ public class view extends javax.swing.JFrame {
     Path outFile;
     ArrayList<String> lines = new ArrayList<String>();
     int finalColumn;
+    String ident;
+    
     public view() {
         initComponents();
         jLabel1.setText(":p");
@@ -65,19 +65,20 @@ public class view extends javax.swing.JFrame {
         symbolsTable.put("|","PIPE");
         symbolsTable.put("&","AMPERSON");
         symbolsTable.put(",","COMA");
-        symbolsTable.put("\\[","OPEN_BR");
-        symbolsTable.put("\\]","CLOSE_BR");
-        symbolsTable.put("\\(","OPEN_PARENT");
-        symbolsTable.put("\\)","CLOSE_PARENT");
+        symbolsTable.put("[","OPEN_BR");
+        symbolsTable.put("]","CLOSE_BR");
+        symbolsTable.put("(","OPEN_PARENT");
+        symbolsTable.put(")","CLOSE_PARENT");
         symbolsTable.put("[]","BRAKETS");
         symbolsTable.put("()","PARENTHESIS");
-        symbolsTable.put("\\{","OPEN_STAPE");
-        symbolsTable.put("\\}","CLOSE_STAPE");
+        symbolsTable.put("{","OPEN_STAPE");
+        symbolsTable.put("}","CLOSE_STAPE");
         symbolsTable.put("{}","STAPLES");
         symbolsTable.put("@","AT");
         symbolsTable.put("#","HASTAG");
         symbolsTable.put("##","DOUBLE_HASTAG");
         finalColumn = 0;
+        ident = "";
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setResizable(false);
     }
@@ -93,8 +94,6 @@ public class view extends javax.swing.JFrame {
 
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -116,55 +115,19 @@ public class view extends javax.swing.JFrame {
             }
         });
 
-        jTable1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
-            },
-            new String [] {
-                "Line #", "Token", "Text"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false, false
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
-        jScrollPane1.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setResizable(false);
-            jTable1.getColumnModel().getColumn(0).setPreferredWidth(-20);
-            jTable1.getColumnModel().getColumn(1).setResizable(false);
-            jTable1.getColumnModel().getColumn(2).setResizable(false);
-        }
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel1))
-                .addContainerGap(486, Short.MAX_VALUE))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -173,9 +136,7 @@ public class view extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 480, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
                 .addComponent(jLabel1)
                 .addGap(6, 6, 6))
         );
@@ -236,35 +197,61 @@ public class view extends javax.swing.JFrame {
                         switch(token){
                             //escribir el .out
                             case RESERVADA:
-                               finalColumn = finalColumn + lexer.yylength();
-                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: RESERVADA, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = lexer.column + lexer.yylength()-1;
+                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: " +lexer.yytext()+" TOKEN: RESERVADA, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
                                finalColumn = 0;
                                 break;
                             case PUNTUACION:
-                               finalColumn = finalColumn + lexer.yylength();
-                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: PUNTUACION, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = lexer.column + lexer.yylength()-1;
+                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+ lexer.yytext()+" TOKEN:"+ symbolsTable.get(lexer.yytext()) +" "+", ON COLUMN: " +lexer.column+" TO: " + finalColumn );
                                finalColumn = 0;
                                 break;
                             case ENTERO:
-                               finalColumn = finalColumn + lexer.yylength();
-                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: ENTERO, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = lexer.column + lexer.yylength()-1;
+                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+ lexer.yytext()+" TOKEN: ENTERO, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
                                finalColumn = 0;
                                 break;
                             case IDENTIFICADOR:
-                               finalColumn = finalColumn + lexer.yylength();
-                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: IDENTIFICADOR, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = lexer.column + lexer.yylength()-1;
+                               if(lexer.yylength() > 31){
+                                   ident = lexer.yytext().substring(0,31);
+                                   lines.add("IDENTIFIER TOO LONG CUTTED DOWN TO 31 CHARS ON LINE: "+ (lexer.line+1) +" FOUND: "+ ident+" TOKEN: IDENTIFICADOR, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                                   ident = "";
+                               }else{
+                                   lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+ lexer.yytext()+" TOKEN: IDENTIFICADOR, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               }
                                finalColumn = 0;                                
                                 break;
                             case ErrorToken:
-                               finalColumn = finalColumn + lexer.yylength();
-                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: ERROR TOKEN NOT SPECIFIED, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = lexer.column + lexer.yylength()-1;
+                               lines.add("ERROR!!! LINE: "+ (lexer.line+1) +" FOUND: "+ lexer.yytext()+" TOKEN: ERROR TOKEN NOT SPECIFIED, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
                                finalColumn = 0; 
                                 break;
                             case ErrorLINEA:
-                               finalColumn = finalColumn + lexer.yylength();
-                               lines.add("LINE: "+ lexer.line +" FOUND: "+"'"+ lexer.yytext()+"' "+ "TOKEN: ERROR COMMENT NOT FINALIZED, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = lexer.column + lexer.yylength()-1;
+                               lines.add("ERROR COMMENT NOT FINALIZED! ON LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN: INVALID, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
                                finalColumn = 0;                                 
                                break;
+                            case DECIMAL:
+                               finalColumn = finalColumn + lexer.yylength();
+                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+ lexer.yytext()+" TOKEN: DECIMAL, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = 0;
+                            break;
+                            case EXPONENCIAL:
+                               finalColumn = lexer.column + lexer.yylength()-1;
+                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN: EXPONENCIAL, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = 0;
+                            break;
+                            case ERRORSTRING:
+                               finalColumn = lexer.column + lexer.yylength()-1;
+                               lines.add("ERROR STRING! ON LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN:INVALID, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = 0; 
+                            break;
+                               case STRING:
+                               finalColumn = lexer.column + lexer.yylength()-1;
+                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN: STRING, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = 0;
+                            break;
                         }
                     }                    
                 }while(true);
@@ -315,7 +302,5 @@ public class view extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
 }
