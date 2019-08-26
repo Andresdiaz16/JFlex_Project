@@ -56,8 +56,8 @@ WhiteSpace = {LineTerminator} | [ \t\f]
 TraditionalComment = "--" {InputCharacter}*
 MultiLineComment = "/*" [^*] ~"*/"| "/*" "*"+ "/"
 Comment = {TraditionalComment} | {MultiLineComment}
-ErrorLinea = ("/*" ([^*/])*)
-ErrorCadena = ("'"([^'\r\n]*))
+ErrorLinea = ("/*" [^\r\n.*]*)
+ErrorCadena = ("'"([^'\r\n])*)
 String =("'"([^'\r\n])*"'")
 
 
