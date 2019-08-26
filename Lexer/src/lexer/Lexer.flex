@@ -59,7 +59,7 @@ Comment = {TraditionalComment} | {MultiLineComment}
 ErrorLinea = ("/*" [^\r\n.*]*)
 ErrorCadena = ("'"([^'\r\n])*)
 String =("'"([^'\r\n])*"'")
-
+Bit = 1|0|"NULL"
 
 %{
     ArrayList<String> ident = new ArrayList<String>();
@@ -78,7 +78,7 @@ column = 0;
 
 {Decimal} {line = yyline; column = yycolumn; return DECIMAL;}
 {Exp} {line = yyline; column = yycolumn; return EXPONENCIAL;}
-
+{Bit} {line = yyline; column = yycolumn; return BIT;}
 {Int} {line = yyline; column = yycolumn; return ENTERO;}
 
 {PLUS} {line = yyline; column = yycolumn; return PUNTUACION;}

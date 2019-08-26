@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package lexer;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
@@ -22,6 +23,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /*
@@ -41,10 +44,29 @@ public class view extends javax.swing.JFrame {
     String ident;
     
     public view() {
+        //SETS THE LOOK AND FEEL OF WINDOWS
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(view.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(view.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(view.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(view.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //CHANGES THE TOOLTIP BACKGROUND COLOR TO WHITE
+        UIManager.put("ToolTip.background", Color.WHITE);
+        //INITIALIZES THE JFRAME AND ITS COMPONENTS
         initComponents();
-        jLabel1.setText(":p");
+        //SETS THE TEXT THAT WILL APPEAR UPON START
+        jLabel1.setText("PLEASE GENERATE THE LEXER FILE");
+        //GETS THE DIMENTIONS OF THE USER SCREEN
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        //INITIALIZE THE  HASHMAP THAT WILL BE USE A DICTIONARY TO GET THE PUNCTUATION DESC OR VALUE
         symbolsTable = new HashMap();
+        //ADDING THE KEYS AND VALUES TO THE HASMAP
         symbolsTable.put(".","POINT");
         symbolsTable.put("+","PLUS");
         symbolsTable.put("-","MINUS");
@@ -77,9 +99,13 @@ public class view extends javax.swing.JFrame {
         symbolsTable.put("@","AT");
         symbolsTable.put("#","HASTAG");
         symbolsTable.put("##","DOUBLE_HASTAG");
+        //INITIALIZING THE COUNTER FOR THE LINES
         finalColumn = 0;
+        //INITIALIZING THE STRING VARIABLE THAT WILL BE USE TO PRINT THE IDENTIFIERS THAT ARE LONGER THAN 31 CHARACTERS
         ident = "";
+        //SETTING THE JFRAME LOCATION TO THE CENTER OF THE USERS SCREEN
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+        //SETTING THE RESIZABLE OPTION TO FALSE SO THE JFRAME KEEPS ITS INTENDED SIZE.
         this.setResizable(false);
     }
 
@@ -95,11 +121,14 @@ public class view extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jButton1.setText("Analyze File");
+        jButton1.setToolTipText("Opens the .sql or .txt ile you want to analyze");
         jButton1.setFocusPainted(false);
+        jButton1.setFocusable(false);
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -107,13 +136,20 @@ public class view extends javax.swing.JFrame {
         });
 
         jButton2.setText("Generate Lexer");
+        jButton2.setToolTipText("Generates the .java that will analyze the input  file");
         jButton2.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jButton2.setFocusPainted(false);
+        jButton2.setFocusable(false);
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
             }
         });
+
+        jButton3.setText("Open File Location");
+        jButton3.setToolTipText("Opens the project location");
+        jButton3.setFocusPainted(false);
+        jButton3.setFocusable(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -125,29 +161,41 @@ public class view extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel1))
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(16, 16, 16)
                 .addComponent(jLabel1)
-                .addGap(6, 6, 6))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //BUTTON THAT GENERATES THE .JAVA FILE FROM THE .LEXER FILE
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        //CREATES A TEMPORARY FILE OF THE .JAVA THAT WAS GENERATED OF THE .LEXER FILE IF IT EXISTS
         File tempFile = new File("C:\\Users\\diego\\Documents\\NetBeansProjects\\Lexer\\src\\lexer\\Analyzer.java");
         boolean exists = tempFile.exists();
+        /*
+        COMPARES IF THE .JAVA FILE EXIST OR NOT
+        IF IT DOESNT EXIST IT CREATES ONE IF IT DOES EXIST THEN
+        IT WOULD FIRST DELETE THE FILE THAT EXISTS AND THEN IT WILL CREATE A NEW
+        THIS TO PREVENT THE USER CHANGING THE .LEXER FILE AND THE PROGRAM USING THE 
+        OLD ONE INSTEAD OF THE NEWLY ADDED.
+        */
         if (exists) {
             tempFile.delete();
             lGen = new Lexer_Generator("C:/Users/diego/Documents/NetBeansProjects/Lexer/src/lexer/Lexer.flex");
@@ -160,13 +208,19 @@ public class view extends javax.swing.JFrame {
             jLabel1.setText("RULES ADDED");
         }
     }//GEN-LAST:event_jButton2ActionPerformed
-
+    
+    
+    //BUTTON THAT ANALYZES THE INPUT FILE
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        //INSTANCING A JFILECHOOSER TO SELECT A FILE
         JFileChooser flc = new JFileChooser();
+        //CREATING A FILTER SO ONLY SQL AND TEXT FILES CAN BE SELECTED BY THE JFC
         FileNameExtensionFilter filter = new FileNameExtensionFilter("SQL or TEXT files", "sql","txt");
+        //ADDING THE PREVIOUS FILTER TO THE JFC
         flc.setFileFilter(filter);
+        //SHOWS THE FILE DIALOG IN THE CENTER
         returnVal = flc.showOpenDialog(null);
+        //CHECKS TO SE IF THE SELECTION MADE BY THE USER WAS A VALID FILE
         if(returnVal == JFileChooser.APPROVE_OPTION){
             File fld = flc.getSelectedFile();
             try {
@@ -187,7 +241,7 @@ public class view extends javax.swing.JFrame {
                 do{
                     Tokens token = lexer.yylex();
                     if(token == null){
-                        //return EOF
+                    //return EOF
                     Files.write(outFile, lines,StandardCharsets.UTF_8, StandardOpenOption.APPEND);
                     lines.clear();
                    Runtime.getRuntime().exec("explorer.exe /open, "+outFile);
@@ -252,6 +306,11 @@ public class view extends javax.swing.JFrame {
                                lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN: STRING, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
                                finalColumn = 0;
                             break;
+                               case BIT:
+                               finalColumn = lexer.column + lexer.yylength()-1;
+                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN: BIT, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               finalColumn = 0;
+                            break;
                         }
                     }                    
                 }while(true);
@@ -301,6 +360,7 @@ public class view extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }
