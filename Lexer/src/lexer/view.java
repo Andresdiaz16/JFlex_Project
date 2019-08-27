@@ -35,6 +35,11 @@ public class view extends javax.swing.JFrame {
     /**
      * Creates new form view
      */
+    
+    /*
+    Global variable intances
+    Some variables that are going to be used thru out the project
+    */
     Lexer_Generator lGen;
     int returnVal;
     Map<String,String> symbolsTable;
@@ -43,6 +48,9 @@ public class view extends javax.swing.JFrame {
     int finalColumn;
     String ident;
     String userPath;
+    String fileName;
+    String[] splitString;
+    
     public view() {
         //SETS THE LOOK AND FEEL OF WINDOWS
         try {
@@ -103,8 +111,12 @@ public class view extends javax.swing.JFrame {
         symbolsTable.put("##","DOUBLE_HASTAG");
         //INITIALIZING THE COUNTER FOR THE LINES
         finalColumn = 0;
-        //INITIALIZING THE STRING VARIABLE THAT WILL BE USE TO PRINT THE IDENTIFIERS THAT ARE LONGER THAN 31 CHARACTERS
+        //INITIALIZE THE STRING VARIABLE THAT WILL BE USE TO PRINT THE IDENTIFIERS THAT ARE LONGER THAN 31 CHARACTERS
         ident = "";
+        //INITIALIZE THE STRING VARIABLE THA WILL BE USE TO GET THE NAME OF THE SELECTED FILE.
+        fileName="";
+        //INITIALIZE THE STRING ARRAY VARIABLE THA WILL BE USE TO GET THE NAME OF THE SELECTED FILE.
+        splitString = new String[2];
         //SETTING THE JFRAME LOCATION TO THE CENTER OF THE USERS SCREEN
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         //SETTING THE RESIZABLE OPTION TO FALSE SO THE JFRAME KEEPS ITS INTENDED SIZE.
@@ -233,16 +245,18 @@ public class view extends javax.swing.JFrame {
             try {
                 BufferedReader reader = new BufferedReader(new FileReader(fld));
                 Analyzer lexer = new Analyzer(reader);
+                splitString = fld.getName().split("\\.");
+                fileName = splitString[0];
                 String line = "";
-                File filePath = new File(userPath+"\\src\\lexer\\Output\\Lexer.out");
+                File filePath = new File(userPath+"\\src\\lexer\\Output\\" +fileName +".out");
                 boolean fileEX = filePath.exists();
                 if(fileEX){
                     filePath.delete();
-                    outFile = Paths.get(userPath+"\\src\\lexer\\Output\\Lexer.out");
+                    outFile = Paths.get(userPath+"\\src\\lexer\\Output\\" +fileName+".out");
                     Files.createFile(outFile);
                 }
                 else{
-                    outFile = Paths.get(userPath+"\\src\\lexer\\Output\\Lexer.out");
+                    outFile = Paths.get(userPath+"\\src\\lexer\\Output\\"+fileName+".out");
                     Files.createFile(outFile);
                 }
                 do{
@@ -251,7 +265,7 @@ public class view extends javax.swing.JFrame {
                     //return EOF
                     Files.write(outFile, lines,StandardCharsets.UTF_8, StandardOpenOption.APPEND);
                     lines.clear();
-                   Runtime.getRuntime().exec("explorer.exe /open, "+outFile);
+                    Runtime.getRuntime().exec("explorer.exe /open, "+outFile);
                     return;
                     }
                     else{
@@ -290,7 +304,7 @@ public class view extends javax.swing.JFrame {
                                 break;
                             case ErrorLINEA:
                                finalColumn = lexer.column + lexer.yylength()-1;
-                               lines.add("ERROR COMMENT NOT FINALIZED! ON LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN: INVALID, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
+                               lines.add("ERROR COMMENT NOT FINALIZED! ON LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN: INVALID STRING, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
                                finalColumn = 0;                                 
                                break;
                             case DECIMAL:
