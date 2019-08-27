@@ -11,7 +11,7 @@ This is a simple analyzer an as such it only report 4 types of errors, the first
 
 You can also encounter an error that will let you know that you didnt properly wrote a string, this program analyzes strings as any set of characters contained in quotes __' '__ so if you find this error most likely will be because it found a sigle quote __'__ and it didnt found the closing quote, its worth mentioning that this program ***can't*** recognize multi line strings, so a string must end on the same line that it started.
 
-The last type or error is mostly a warning rather than an error, for the porpouse of this project Identifiers cannot be larger than 31 characters, so if the analyzer finds an identifier that is longer than this, it will cut it down to exactly 31 characters, is also worth mentiong that this programs considers an identifier a set of characters that start with a letter and ends with a set of letters/digits or underscores, anything that matches this description will be consider an identifier (e.g. Foo1_ , F_o_o2 ).
+The last type or error is mostly a warning rather than an error, for the porpouse of this project Identifiers cannot be larger than 31 characters, so if the analyzer finds an identifier that is longer than this, it will cut it down to exactly 31 characters, is also worth mentiong that this programs considers an identifier a set of characters that start with a letter and ends with a set of letters/digits or underscores, anything that matches this description will be consider an identifier (e.g. Foo1_, F_o_o2).
 
 ## Getting Started
 
