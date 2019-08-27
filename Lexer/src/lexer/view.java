@@ -42,7 +42,7 @@ public class view extends javax.swing.JFrame {
     ArrayList<String> lines = new ArrayList<String>();
     int finalColumn;
     String ident;
-    
+    String userPath;
     public view() {
         //SETS THE LOOK AND FEEL OF WINDOWS
         try {
@@ -60,8 +60,10 @@ public class view extends javax.swing.JFrame {
         UIManager.put("ToolTip.background", Color.WHITE);
         //INITIALIZES THE JFRAME AND ITS COMPONENTS
         initComponents();
+        //GETS THE CURRENT DIRECTORY WHERE THE PROJECT IS CURRENTLY ON FOR FUTURE USE
+        userPath = System.getProperty("user.dir");
         //SETS THE TEXT THAT WILL APPEAR UPON START
-        jLabel1.setText("PLEASE GENERATE THE LEXER FILE");
+        jLabel1.setText("PLEASE GENERATE THE JAVA FILE");
         //GETS THE DIMENTIONS OF THE USER SCREEN
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         //INITIALIZE THE  HASHMAP THAT WILL BE USE A DICTIONARY TO GET THE PUNCTUATION DESC OR VALUE
@@ -150,6 +152,11 @@ public class view extends javax.swing.JFrame {
         jButton3.setToolTipText("Opens the project location");
         jButton3.setFocusPainted(false);
         jButton3.setFocusable(false);
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -187,7 +194,7 @@ public class view extends javax.swing.JFrame {
     //BUTTON THAT GENERATES THE .JAVA FILE FROM THE .LEXER FILE
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         //CREATES A TEMPORARY FILE OF THE .JAVA THAT WAS GENERATED OF THE .LEXER FILE IF IT EXISTS
-        File tempFile = new File("C:\\Users\\diego\\Documents\\NetBeansProjects\\Lexer\\src\\lexer\\Analyzer.java");
+        File tempFile = new File(userPath+"\\src\\lexer\\Analyzer.java");
         boolean exists = tempFile.exists();
         /*
         COMPARES IF THE .JAVA FILE EXIST OR NOT
@@ -198,12 +205,12 @@ public class view extends javax.swing.JFrame {
         */
         if (exists) {
             tempFile.delete();
-            lGen = new Lexer_Generator("C:/Users/diego/Documents/NetBeansProjects/Lexer/src/lexer/Lexer.flex");
+            lGen = new Lexer_Generator(userPath+"/src/lexer/Lexer.flex");
             lGen.GenerateLexer();
-            jLabel1.setText("NEW RULES ADDED");
+            jLabel1.setText("RULES ADDED");
         }
         else{
-            lGen = new Lexer_Generator("C:/Users/diego/Documents/NetBeansProjects/Lexer/src/lexer/Lexer.flex");
+            lGen = new Lexer_Generator(userPath+"/src/lexer/Lexer.flex");
             lGen.GenerateLexer();
             jLabel1.setText("RULES ADDED");
         }
@@ -227,15 +234,15 @@ public class view extends javax.swing.JFrame {
                 BufferedReader reader = new BufferedReader(new FileReader(fld));
                 Analyzer lexer = new Analyzer(reader);
                 String line = "";
-                File filePath = new File("C:\\Users\\diego\\Documents\\NetBeansProjects\\Lexer\\src\\lexer\\Lexer.out");
+                File filePath = new File(userPath+"\\src\\lexer\\Output\\Lexer.out");
                 boolean fileEX = filePath.exists();
                 if(fileEX){
                     filePath.delete();
-                    outFile = Paths.get("C:\\Users\\diego\\Documents\\NetBeansProjects\\Lexer\\src\\lexer\\Lexer.out");
+                    outFile = Paths.get(userPath+"\\src\\lexer\\Output\\Lexer.out");
                     Files.createFile(outFile);
                 }
                 else{
-                    outFile = Paths.get("C:\\Users\\diego\\Documents\\NetBeansProjects\\Lexer\\src\\lexer\\Lexer.out");
+                    outFile = Paths.get(userPath+"\\src\\lexer\\Output\\Lexer.out");
                     Files.createFile(outFile);
                 }
                 do{
@@ -321,6 +328,15 @@ public class view extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        try {
+            // TODO add your handling code here:
+            Runtime.getRuntime().exec("explorer.exe /open, "+userPath+"\\src\\lexer\\Output");
+        } catch (IOException ex) {
+            Logger.getLogger(view.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * @param args the command line arguments
