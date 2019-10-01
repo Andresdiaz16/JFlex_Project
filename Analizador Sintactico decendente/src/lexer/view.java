@@ -112,8 +112,8 @@ public class view extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -148,18 +148,9 @@ public class view extends javax.swing.JFrame {
             }
         });
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        jScrollPane1.setViewportView(jTable1);
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane2.setViewportView(jTextArea1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -167,16 +158,18 @@ public class view extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel1))
-                .addContainerGap(191, Short.MAX_VALUE))
-            .addComponent(jScrollPane1)
+                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 172, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -187,10 +180,14 @@ public class view extends javax.swing.JFrame {
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(16, 16, 16)
-                .addComponent(jLabel1)
-                .addGap(45, 45, 45)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 470, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(105, 105, 105)
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 506, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
 
         pack();
@@ -267,6 +264,9 @@ public class view extends javax.swing.JFrame {
                     }
                     else{
                         jLabel1.setText("Se completo con errores");
+                        for (int i = 0; i < errorList.size(); i++) {
+                            jTextArea1.append(errorList.get(i)+ "\n");
+                        }
                     }
                     return;
                     }
@@ -305,7 +305,7 @@ public class view extends javax.swing.JFrame {
                document.remove(0);parserPos++;
                Update();
                break;
-           case "DELTE":
+           case "DELETE":
                document.remove(0);parserPos++;
                Delete();
                break;
@@ -404,6 +404,7 @@ public class view extends javax.swing.JFrame {
                 line = Tdetail.get(parserPos).returnLine();
                 column = Tdetail.get(parserPos).returnColumn();
                 errorList.add("Missing: From Statement on line: " +line+" and column: " + column );
+                whileEnd();
                 break;
         }
     }
@@ -434,14 +435,8 @@ public class view extends javax.swing.JFrame {
                     expression();
                     endF();
                 }
-                else if(document.get(0).equals("$")){
+                if(document.get(0).equals("$")){
                     
-                }
-                else{                                        
-                    line = Tdetail.get(parserPos).returnLine();
-                    column = Tdetail.get(parserPos).returnColumn();
-                    errorList.add("Missing: VALUES Statement on line: " +line+" and column: " + column );
-                    whileEnd();
                 }
                 break;
             default:
@@ -699,7 +694,7 @@ public class view extends javax.swing.JFrame {
             else{
             line = Tdetail.get(parserPos).returnLine();
             column = Tdetail.get(parserPos).returnColumn();
-            errorList.add("Missing: "+Tdetail.get(parserPos).getText()+ " Statement on line: " +line+" and column: " + column );
+            errorList.add("Missing: BY Statement on line: " +line+" and column: " + column );
                 whileEnd();
             }
             if (document.get(0).equals("ORDER")) {
@@ -715,7 +710,7 @@ public class view extends javax.swing.JFrame {
                 else{
             line = Tdetail.get(parserPos).returnLine();
             column = Tdetail.get(parserPos).returnColumn();
-            errorList.add("Missing: "+Tdetail.get(parserPos).getText()+ " Statement on line: " +line+" and column: " + column );
+            errorList.add("Missing: BY Statement on line: " +line+" and column: " + column );
                         whileEnd();
                 }
             }if (document.get(0).equals("HAVING")) {
@@ -1463,7 +1458,7 @@ public class view extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextArea jTextArea1;
     // End of variables declaration//GEN-END:variables
 }
