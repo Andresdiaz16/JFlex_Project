@@ -64,6 +64,7 @@ Bit = 1|0|"NULL"
 %{
     ArrayList<String> ident = new ArrayList<String>();
     ArrayList<String> doc = new ArrayList<String>();
+    ArrayList<LINE> docDetail = new ArrayList<LINE>();
     int line;
     int column;
 %}
@@ -81,63 +82,127 @@ column = 0;
 
 {Reservada} {line = yyline; column = yycolumn; 
 doc.add(yytext());
+docDetail.add(new LINE(line,column,yytext()));
 return RESERVADA;}
 
 {Decimal} {line = yyline; column = yycolumn; doc.add("number");
+docDetail.add(new LINE(line,column,"number"));
  return DECIMAL;}
 
 {Exp} {line = yyline; column = yycolumn; doc.add("number");
+docDetail.add(new LINE(line,column,"number"));
  return EXPONENCIAL;}
 
 {Bit} {line = yyline; column = yycolumn; doc.add(yytext());
+docDetail.add(new LINE(line,column,yytext()));
  return BIT;}
 
 {Int} {line = yyline; column = yycolumn; doc.add("number");
+docDetail.add(new LINE(line,column,"number"));
  return ENTERO;}
 
 {PLUS} {line = yyline; column = yycolumn; doc.add(yytext());
+docDetail.add(new LINE(line,column,yytext()));
 return PUNTUACION;}
 
 {MINUS} {line = yyline; column = yycolumn; doc.add(yytext());
+docDetail.add(new LINE(line,column,yytext()));
  return PUNTUACION;}
 
 {TIMES} {line = yyline; column = yycolumn; doc.add(yytext());
+docDetail.add(new LINE(line,column,yytext()));
 return PUNTUACION;}
 
 {SLASH} {line = yyline; column = yycolumn; doc.add(yytext());
+docDetail.add(new LINE(line,column,yytext()));
 return PUNTUACION;}
 
 {MOD} {line = yyline; column = yycolumn; doc.add(yytext());
+docDetail.add(new LINE(line,column,yytext()));
 return PUNTUACION;}
 
-{MIN} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{MINEQ} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;} 
-{MAX} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{MAXEQ} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{EQ} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{SAME} {line = yyline; column = yycolumn;  doc.add(yytext()); return PUNTUACION;}
-{NOTEQ} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{AND} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;} 
-{OR} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{NOT} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;} 
-{SEMICOL} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{COMA} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{POINT} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{OPBRAKET} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;} 
-{CLOSEBRAKET} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{OPENPARENTH} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{CLOSEPARENTH} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{OPENCLAUSE} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{CLOSECLAUSE} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{BRAKETS} = {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{PARENTHESIS} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{CLAUSE} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{AT} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{NUM} {line = yyline; column = yycolumn; doc.add(yytext()); return PUNTUACION;}
-{DOUBLENUM} {line = yyline; column = yycolumn;  doc.add(yytext()); return PUNTUACION;} 
+{MIN} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{MINEQ} {line = yyline; column = yycolumn; doc.add(yytext());
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;} 
+{MAX} {line = yyline; column = yycolumn; doc.add(yytext());
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{MAXEQ} {line = yyline; column = yycolumn; doc.add(yytext());
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{EQ} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{SAME} {line = yyline; column = yycolumn;  doc.add(yytext());
+docDetail.add(new LINE(line,column,yytext()));
+ return PUNTUACION;}
+{NOTEQ} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{AND} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;} 
+{OR} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{NOT} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;} 
+{SEMICOL} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{COMA} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{POINT} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{OPBRAKET} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;} 
+{CLOSEBRAKET} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{OPENPARENTH} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{CLOSEPARENTH} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{OPENCLAUSE} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{CLOSECLAUSE} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{BRAKETS} = {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{PARENTHESIS} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{CLAUSE} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{AT} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{NUM} {line = yyline; column = yycolumn; doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;}
+{DOUBLENUM} {line = yyline; column = yycolumn;  doc.add(yytext()); 
+docDetail.add(new LINE(line,column,yytext()));
+return PUNTUACION;} 
 
-{Identifier} {doc.add("ident");}
-{String} {line = yyline; column = yycolumn; doc.add("string"); return STRING;}
+{Identifier} {doc.add("ident");
+docDetail.add(new LINE(line,column,"ident"));
+}
+{String} {line = yyline; column = yycolumn; doc.add("string"); 
+docDetail.add(new LINE(line,column,yytext()));
+return STRING;}
 
 {Comment} {/*Ignore*/}
 {WhiteSpace} {/*Ignore*/}
