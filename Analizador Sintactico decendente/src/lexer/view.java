@@ -79,14 +79,15 @@ public class view extends javax.swing.JFrame {
         //initialize the parser position
         parserPos = 0;         
         //INITIALIZING THE LIST THAT WILL CONTAIN THE BASIC OPERATIONS OF THE QUERYS
-        initFunctions.add("SELECT");
-        initFunctions.add("UPDATE");
-        initFunctions.add("INSERT");
-        initFunctions.add("DELETE");
-        initFunctions.add("CREATE");
-        initFunctions.add("ALTER");
-        initFunctions.add("DROP");
-        initFunctions.add("TRUNCATE");
+        initFunctions.add("AVG");
+        initFunctions.add("SUM");
+        initFunctions.add("COUNT");
+        initFunctions.add("DIFF");
+        initFunctions.add("DATEDIFF");
+        initFunctions.add("DATEPART");
+        initFunctions.add("DATENAME");
+        initFunctions.add("CAST");
+        initFunctions.add("CONVERT");
         //INITIALIZE THE STRING ARRAY VARIABLE THA WILL BE USE TO GET THE NAME OF THE SELECTED FILE.
         splitString = new String[2];
         //SETTING THE JFRAME LOCATION TO THE CENTER OF THE USERS SCREEN
@@ -108,6 +109,8 @@ public class view extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -142,6 +145,19 @@ public class view extends javax.swing.JFrame {
             }
         });
 
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -156,7 +172,8 @@ public class view extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(191, Short.MAX_VALUE))
+            .addComponent(jScrollPane1)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -169,7 +186,8 @@ public class view extends javax.swing.JFrame {
                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(16, 16, 16)
                 .addComponent(jLabel1)
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addGap(45, 45, 45)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 470, Short.MAX_VALUE))
         );
 
         pack();
@@ -274,52 +292,54 @@ public class view extends javax.swing.JFrame {
     
 //metodo que recibe el token inicial de la gramatica sea: SELECT, UPDATE, INSERT, DELETE, CREATE,ALTER,DROP O TRUNCATE
     private void Start_Token(String initToken){
-       if(initFunctions.contains(initToken)){
-           
-           int index = initFunctions.indexOf(initToken);
-           initFunctions.remove(index);
-           
-           switch(initToken){
-               case "SELECT":
-                   document.remove(0);
-                   Select();
-                   break;
-               case "UPDATE":
-                   document.remove(0);
-                   Update();
-                   break;
-               case "DELTE":
-                   document.remove(0);
-                   Delete();
-                   break;
-               case "INSERT":                   
-                   document.remove(0);
-                   Insert();
-                   break;
-               case "CREATE":
-                   break;
-               case "ALTER":
-                   break;
-               case "TRUNCATE":
-                   break;
-               case "DROP":
-                   document.remove(0);
-                   Drop();
-                   break;
-               case "$":
-                   //Fin de programa
-                   break;
-           }
-       }
-       else{
-           //return error
+       switch(initToken){
+           case "SELECT":
+               document.remove(0);
+               Select();
+               break;
+           case "UPDATE":
+               document.remove(0);
+               Update();
+               break;
+           case "DELTE":
+               document.remove(0);
+               Delete();
+               break;
+           case "INSERT":                   
+               document.remove(0);
+               Insert();
+               break;
+           case "CREATE":
+               document.remove(0);
+               Create();
+               break;
+           case "ALTER":
+               whileEnd();
+               break;
+           case "TRUNCATE":
+               document.remove(0);
+               Truncate();
+               break;
+           case "DROP":
+               document.remove(0);
+               Drop();
+               break;
+           case "$":
+               //Fin de programa
+               break;
        }
     }
     //Metod para el statement select
     private void Select(){
         checkParams();
-        document.remove(0);
-        From();
+        if (document.get(0).equals("FROM")) {
+            document.remove(0);
+            From();
+        }else{
+            errorList.add("Missing from Statement");
+            whileEnd();
+        }
+
     }
     
     //Metodo para el statement del update
@@ -343,6 +363,7 @@ public class view extends javax.swing.JFrame {
             }
         }else{
             errorList.add("Missing SET statement");
+            whileEnd();
         }
         flag = false;
     }
@@ -406,6 +427,57 @@ public class view extends javax.swing.JFrame {
         }
     }
     
+    private void Create(){
+        String tkn = document.get(0);
+        switch(tkn){
+            case "TABLE":
+                document.remove(0);
+                Table();
+                break;
+            case"VIEW":
+                document.remove(0);
+                View();
+                break;
+            case "DATABASE":
+                document.remove(0);
+                Database();
+                break;
+        }
+    }
+    
+    private void Truncate(){
+        String tkn = document.get(0);
+         switch(tkn){
+             case "TABLE":
+                 document.remove(0);
+                 checkParams();
+                 break;
+             default:
+                 errorList.add("Missing table statement");
+                 whileEnd();
+                 break;
+         }
+         endF();
+    }
+    
+    private void Database(){
+        checkParams();
+        endF();
+    }
+    
+    //metodo que crea una view
+    private void View(){
+        checkParams();
+        endF();
+    }
+    //metodo que crea una tabla
+    private void Table(){
+        identifier();
+        expression();
+        checkParams();
+        endF();
+    }
+    
     //Metodo que maneja las diferentes opciones del drop statement
     private void Drop(){
         String tkn = document.get(0);
@@ -454,6 +526,14 @@ public class view extends javax.swing.JFrame {
                 }
                 break;
             case "VIEW":
+                document.remove(0);
+                if (document.get(0).equals("IF")) {
+                    document.remove(0);
+                    if (document.get(0).equals("EXISTS")) {
+                        document.remove(0);
+                    }
+                }
+                checkParams();
                 break;
         }
         endF();
@@ -461,7 +541,7 @@ public class view extends javax.swing.JFrame {
     
     //funcion de from
     private void From(){
-        identifier();
+        checkParams();
         if("AS".equals(document.get(0))){
             document.remove(0);
             identifier();
@@ -472,15 +552,15 @@ public class view extends javax.swing.JFrame {
                 document.remove(0);
                 if("OUTER".equals(document.get(0))){
                     document.remove(0);
-                    From();
                 }
+                From();
                 break;
             case "RIGHT":
                 document.remove(0);
                 if("OUTER".equals(document.get(0))){
                     document.remove(0);
-                    From();
                 }
+                From();
                 break;
             case "INNER":
                 document.remove(0);
@@ -548,7 +628,12 @@ public class view extends javax.swing.JFrame {
                     if (document.get(0).equals("BY")) {
                         document.remove(0);
                         checkParams();
+                        if (document.get(0).equals("HAVING")) {
+                            document.remove(0);
+                            checkParams();
+                        }
                     }
+                    
                 }
             }
             else{
@@ -560,6 +645,10 @@ public class view extends javax.swing.JFrame {
                 if (document.get(0).equals("BY")) {
                     document.remove(0);
                     checkParams();
+                    if (document.get(0).equals("HAVING")) {
+                        document.remove(0);
+                        checkParams();
+                    }
                 }
                 else{
                     errorList.add("Missing BY statement on the ORDER statement");
@@ -613,13 +702,17 @@ public class view extends javax.swing.JFrame {
             expression();
             checkParams();
         }
-        //en caso del select que venga un valor de multiplicacion
+        //en caso del select que venga un valor de multiplicacion se elimina en expression();
         if(document.get(0).equals("*")){
            expression();
         }
         if (document.get(0).equals("AS")) {
             document.remove(0);
             checkParams();
+        }
+        if (document.get(0).equals("SELECT")) {
+            document.remove(0);
+            Select();
         }
         if (document.get(0).equals("MATCH")) {
             document.remove(0);
@@ -684,7 +777,385 @@ public class view extends javax.swing.JFrame {
             expression();
             checkParams();
         }
+        if (document.get(0).equals("COLLATE")) {
+            document.remove(0);
+            checkParams();
+        }
+        if (document.get(0).equals("CONSTRAINT")) {
+            document.remove(0);
+            checkParams();
+        }
+        if (document.get(0).equals("DEFAULT")) {
+            document.remove(0);
+            String doc = document.get(0);
+            switch(doc){
+                case"number":
+                    nums();
+                    break;
+                case "string":
+                    str();
+                    break;
+                case"NULL":
+                    document.remove(0);
+                    break;
+                default:
+                    errorList.add("Missing statement after the DEFAULT");
+                    whileEnd();
+                    break;
+            }
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("PRIMARY")) {
+            document.remove(0);
+            if (document.get(0).equals("KEY")) {
+                document.remove(0);
+                if (document.get(0).equals("UNIQUE")) {
+                    errorList.add("Ambiguous declaration of PRIMARY KEY, its already a unique statement");
+                    whileEnd();
+                }
+                if (document.get(0).equals("NONCLUSTERED")) {
+                    document.remove(0);
+                }
+                if (document.get(0).equals("CLUSTERED")) {
+                    document.remove(0);
+                }
+                if (document.get(0).equals("ON")) {
+                    document.remove(0);
+                    if (document.get(0).equals("\"default\"")) {
+                        document.remove(0);
+                    }
+                    checkParams();
+                }
+            }
+            else{
+                errorList.add("Missing \"KEY\" statement");
+                whileEnd();
+            }
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("UNIQUE")) {
+            document.remove(0);
+            if (document.get(0).equals("PRIMARY")) {
+                errorList.add("Ambiguous declaration of UNIQUE statement");
+                whileEnd();
+            }
+            if (document.get(0).equals("NONCLUSTERED")) {
+                document.remove(0);
+            }
+            if (document.get(0).equals("CLUSTERED")) {
+            document.remove(0);
+            }
+            if (document.get(0).equals("ON")) {
+                document.remove(0);
+                if (document.get(0).equals("\"default\"")) {
+                    document.remove(0);
+                }
+                checkParams();
+            }            
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("FOREIGN")) {
+            document.remove(0);
+            if (document.get(0).equals("KEY")) {
+                document.remove(0);
+                expression();
+                if (document.get(0).equals("REFERENCES")) {
+                    document.remove(0);
+                    checkParams();
+                    if (document.get(0).equals("ON")) {
+                        document.remove(0);
+                        String token = document.get(0);
+                        switch(token){
+                            case"DELETE":
+                                document.remove(0);
+                                if (document.get(0).equals("NO")) {
+                                    document.remove(0);
+                                    if (document.get(0).equals("ACTION")) {
+                                        document.remove(0);
+                                    }
+                                    else{
+                                        errorList.add("Missing statement");
+                                    }
+                                }
+                                else if (document.get(0).equals(("SET"))) {
+                                    document.remove(0);
+                                    if (document.get(0).equals("NULL")) {
+                                        document.remove(0);
+                                    }
+                                    else if (document.get(0).equals("DEFAULT")) {
+                                        document.remove(0);
+                                    }
+                                    else{
+                                        errorList.add("Missing SET statement predicate");
+                                        whileEnd();
+                                    }
+                                }
+                                else if (document.get(0).equals("CASCADE")) {
+                                    document.remove(0);
+                                }
+                                else{
+                                    errorList.add("Missing Statement after the delete fuction.");
+                                    whileEnd();
+                                }
+                                break;
+                            case"UPDATE":
+                                document.remove(0);
+                                document.remove(0);
+                                if (document.get(0).equals("NO")) {
+                                    document.remove(0);
+                                    if (document.get(0).equals("ACTION")) {
+                                        document.remove(0);
+                                    }
+                                    else{
+                                        errorList.add("Missing statement");
+                                    }
+                                }
+                                else if (document.get(0).equals(("SET"))) {
+                                    document.remove(0);
+                                    if (document.get(0).equals("NULL")) {
+                                        document.remove(0);
+                                    }
+                                    else if (document.get(0).equals("DEFAULT")) {
+                                        document.remove(0);
+                                    }
+                                    else{
+                                        errorList.add("Missing SET statement predicate");
+                                        whileEnd();
+                                    }
+                                }
+                                else if (document.get(0).equals("CASCADE")) {
+                                    document.remove(0);
+                                }
+                                else{
+                                    errorList.add("Missing Statement after the update fuction.");
+                                    whileEnd();
+                                }                                
+                                break;
+                                case"NOT":
+                                    document.remove(0);
+                                    if (document.get(0).equals("FOR")) {
+                                        document.remove(0);
+                                        if (document.get(0).equals("REPLICATION")) {
+                                           document.remove(0);
+                                        }
+                                        else{
+                                            errorList.add("Missing REPLICATION statement");
+                                        }
+                                    }
+                                    else{
+                                        errorList.add("Missing REPLICANTION statement");
+                                    }
+                                    break;
+                        }
+                    }
+                }   
+            }
+            else{
+                errorList.add("Incomplete statement, missing \"KEY\" word");
+                whileEnd();
+            }
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("CHECK")) {
+            document.remove(0);
+            if (document.get(0).equals("NOT")) {
+                document.remove(0);
+                if (document.get(0).equals("FOR")) {
+                    document.remove(0);
+                    if (document.get(0).equals("REPLICATION")) {
+                        document.remove(0);
+                    }
+                }
+            }
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("INT")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("VARCHAR")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("NCHAR")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("DATETIME")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("BIT")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("FLOAT")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("MAX")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("DOCUMENT")) {
+            document.remove(0);
+            identifier();
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("CONTENT")) {
+            document.remove(0);
+            identifier();
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("CHAR")) {
+            document.remove(0);
+            expression();
+            checkParams();
+            
+        }
+        if (document.get(0).equals("NVARCHAR")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("BIGINT")) {
+            document.remove(0);
+            expression();
+            checkParams();            
+        }
+        if (document.get(0).equals("SMALLINT")) {
+            document.remove(0);
+            expression();
+            checkParams();            
+        }
+        if (document.get(0).equals("TINYINT")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("REAL")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("INDEX")) {
+            document.remove(0);
+            identifier();
+            if (document.get(0).equals("CLUSTERED")) {
+                document.remove(0);
+                if (document.get(0).equals("COLUMNSTORE")) {
+                    document.remove(0);
+                }
+            }
+            else if(document.get(0).equals("NONCLUSTERED")){
+                document.remove(0);
+                if (document.get(0).equals("COLUMNSTORE")) {
+                    document.remove(0);
+                    expression();
+                }
+            }
+            else if (document.get(0).equals("COLUMNSTORE")){
+                document.remove(0);
+                expression();
+            }
+            if (document.get(0).equals("ON")) {
+                document.remove(0);
+                identifier();
+                expression();
+            }
+            expression();
+            if (document.get(0).equals("WHERE")) {
+                From();
+            }
+        }
+        if (document.get(0).equals("ASC")) {
+            document.remove(0);
+            checkParams();
+        }
+        if (document.get(0).equals("DESC")) {
+            document.remove(0);
+            checkParams();
+        }
+        if (document.get(0).equals("NULL")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("ON")) {
+            document.remove(0);
+            if (document.get(0).equals("PRIMARY")) {
+                document.remove(0);
+                expression();
+                checkParams();
+            }
+            if (document.get(0).equals("LOG")) {
+                document.remove(0);
+                if (document.get(0).equals("ON")) {
+                    document.remove(0);
+                    expression();
+                    checkParams();
+                }
+            }
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("NAME")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("FILENAME")) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
+        if (document.get(0).equals("SIZE")) {
+            document.remove(0);
+            expression();
+        }
+        if (document.get(0).equals("KB")) {
+            document.remove(0);
+            expression();
+        }
         
+        if (document.get(0).equals("MB")) {
+            document.remove(0);
+            expression();
+        }
+        
+        if (document.get(0).equals("GB")) {
+            document.remove(0);
+            expression();
+        }
+        
+        if (document.get(0).equals("TB")) {
+            document.remove(0);
+            expression();
+        }
+        
+        if (document.get(0).equals("FILEGROWTH")) {
+            document.remove(0);
+            expression();
+        }
+        if (initFunctions.contains(document.get(0))) {
+            document.remove(0);
+            expression();
+            checkParams();
+        }
     }
     
     //metodo que elimina los tokens "number" que incluye enteros, float y exponenciales no importando si son o no negativos
@@ -725,60 +1196,75 @@ public class view extends javax.swing.JFrame {
             break;
         case"+":
             document.remove(0);
+            checkParams();
             break;
         case "-":
             document.remove(0);
+            checkParams();
             break;
         case "*":
             document.remove(0);
+            checkParams();
             break;
         case "/":
             document.remove(0);
+            checkParams();
             break;
         case "%":
             document.remove(0);
+            checkParams();
             break;
         case "<":
             document.remove(0);
+            checkParams();
             break;
         case "<=":
             document.remove(0);
+            checkParams();
             break;
         case ">":
             document.remove(0);
+            checkParams();
             break;
         case ">=":
             document.remove(0);
+            checkParams();
             break;
         case "=":
             document.remove(0);
+            checkParams();
             break;
         case "==":
             document.remove(0);
+            checkParams();
             break;
         case "!=":
             document.remove(0);
+            checkParams();
             break;
         case "!":
             document.remove(0);
-            break;
-        case ";":
-            document.remove(0);
+            checkParams();
             break;
         case "&&":
             document.remove(0);
+            checkParams();
             break;
         case "||":
             document.remove(0);
+            checkParams();
             break;
         case "|":
             document.remove(0);
+            checkParams();
             break;
         case "&":
             document.remove(0);
+            checkParams();
             break;
         case ",":
             document.remove(0);
+            checkParams();
             break;
         case "[":
             //falta el closing braket
@@ -795,12 +1281,15 @@ public class view extends javax.swing.JFrame {
                 errorList.add("Error falta cierre de parentesis");
                 whileEnd();
             }
+            expression();
             break;
         case "[]":
             document.remove(0);
+            checkParams();
             break;
         case "()":
             document.remove(0);
+            checkParams();
             break;
         case "{":
             //falta el closing brace
@@ -817,12 +1306,15 @@ public class view extends javax.swing.JFrame {
             break;
         case"@":
             document.remove(0);
+            checkParams();
             break;
         case"#":
             document.remove(0);
+            checkParams();
             break;
         case "##":
             document.remove(0);
+            checkParams();
             break;
         }
     }
@@ -876,5 +1368,7 @@ public class view extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
 }
