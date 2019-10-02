@@ -275,11 +275,14 @@ public class view extends javax.swing.JFrame {
                         switch(token){
                             case ErrorToken:
                                 //exit(0); 
+                                errorList.add("TOKEN incorrecto en: " + lexer.line + " and column: " +lexer.column);
                                 break;
                             case ErrorLINEA:
+                                errorList.add("TOKEN incorrecto en: " + lexer.line + " and column: " +lexer.column);
                                 //exit(0);                                 
                                break;
                             case ERRORSTRING:
+                                errorList.add("TOKEN incorrecto en: " + lexer.line + " and column: " +lexer.column);
                                 //exit(0);
                             break;
                         }
@@ -371,6 +374,7 @@ public class view extends javax.swing.JFrame {
                 line = Tdetail.get(parserPos).returnLine();
                 column = Tdetail.get(parserPos).returnColumn();
                 errorList.add("Missing: From or Where Statement on line: " +line+" and column: " + column );
+                whileEnd();
             }
         }else{
             line = Tdetail.get(parserPos).returnLine();
@@ -386,6 +390,7 @@ public class view extends javax.swing.JFrame {
         String tkn = document.get(0);
         switch(tkn){
             case "TOP":
+            document.remove(0);parserPos++;   
             expression();
             if(document.get(0).equals("PERCENT")){
             document.remove(0);parserPos++;
@@ -439,11 +444,6 @@ public class view extends javax.swing.JFrame {
                     
                 }
                 break;
-            default:
-                line = Tdetail.get(parserPos).returnLine();
-                column = Tdetail.get(parserPos).returnColumn();
-                errorList.add("Missing: INTO Statement on line: " +line+" and column: " + column );
-                break;
         }
     }
     
@@ -472,6 +472,7 @@ public class view extends javax.swing.JFrame {
             line = Tdetail.get(parserPos).returnLine();
                 column = Tdetail.get(parserPos).returnColumn();
                 errorList.add("Missing: TABLE,VIEW,INDEX,DATABASE or USER Statement on line: " +line+" and column: " + column );
+                whileEnd();
                 break;
         }
     }
@@ -564,6 +565,11 @@ public class view extends javax.swing.JFrame {
                 checkParams();
                 if (document.get(0).equals("ON")) {
                     checkParams();
+                }else{
+                line = Tdetail.get(parserPos).returnLine();
+                column = Tdetail.get(parserPos).returnColumn();
+                errorList.add("Missing: ON statement on line: " +line+" and column: " + column );
+                whileEnd();   
                 }
                 break;
             case "VIEW":
@@ -622,12 +628,6 @@ public class view extends javax.swing.JFrame {
                          expression();
                          identifier();
                          From();
-                    }
-                    else{
-                    line = Tdetail.get(parserPos).returnLine();
-                    column = Tdetail.get(parserPos).returnColumn();
-                    errorList.add("Missing: ON Statement on line: " +line+" and column: " + column );
-                    whileEnd();
                     }
                 break;
 
@@ -743,6 +743,9 @@ public class view extends javax.swing.JFrame {
         }
         else if(document.get(0).equals(";")){
             document.remove(0);parserPos++;
+            if (document.get(0).equals("GO")) {
+                document.remove(0);parserPos++;
+            }
             Start_Token(document.get(0));
         }
     }
@@ -754,7 +757,7 @@ public class view extends javax.swing.JFrame {
             expression();
             checkParams();
         }
-        if(document.get(0).equals("number")){
+        if(document.get(0).equals("number")||document.get(0).equals("1") || document.get(0).equals("0") ){
             nums();
             expression();
             checkParams();
@@ -860,6 +863,9 @@ public class view extends javax.swing.JFrame {
                 case"NULL":
                     document.remove(0);parserPos++;
                     break;
+                case"VALUES":
+                    document.remove(0);parserPos++;
+                    break;
                 default:
                     errorList.add("Missing:  statement after the DEFAULT");
                     whileEnd();
@@ -949,6 +955,7 @@ public class view extends javax.swing.JFrame {
                                         line = Tdetail.get(parserPos).returnLine();
                                         column = Tdetail.get(parserPos).returnColumn();
                                         errorList.add("Missing: "+Tdetail.get(parserPos).getText()+ " Statement on line: " +line+" and column: " + column );
+                                        whileEnd();
                                     }
                                 }
                                 else if (document.get(0).equals(("SET"))) {
@@ -988,6 +995,7 @@ public class view extends javax.swing.JFrame {
                                         line = Tdetail.get(parserPos).returnLine();
                                         column = Tdetail.get(parserPos).returnColumn();
                                         errorList.add("Missing: "+Tdetail.get(parserPos).getText()+ " Statement on line: " +line+" and column: " + column );
+                                        whileEnd();
                                     }
                                 }
                                 else if (document.get(0).equals(("SET"))) {
@@ -1023,13 +1031,15 @@ public class view extends javax.swing.JFrame {
                                         else{
                                         line = Tdetail.get(parserPos).returnLine();
                                         column = Tdetail.get(parserPos).returnColumn();
-                                        errorList.add("Missing: REPLICATION Statement on line: " +line+" and column: " + column );                                            
+                                        errorList.add("Missing: REPLICATION Statement on line: " +line+" and column: " + column );       
+                                        whileEnd();
                                         }
                                     }
                                     else{
                                         line = Tdetail.get(parserPos).returnLine();
                                         column = Tdetail.get(parserPos).returnColumn();
-                                        errorList.add("Missing: REPLICATIO Statement on line: " +line+" and column: " + column );                                        
+                                        errorList.add("Missing: REPLICATIO Statement on line: " +line+" and column: " + column );  
+                                        whileEnd();
                                     }
                                     break;
                         }
@@ -1236,6 +1246,11 @@ public class view extends javax.swing.JFrame {
             document.remove(0);parserPos++;
             expression();
         }
+        if (document.get(0).equals("IDENTITY")) {
+            document.remove(0);parserPos++;
+            expression();
+            checkParams();
+        }
         if (initFunctions.contains(document.get(0))) {
             document.remove(0);parserPos++;
             expression();
@@ -1245,7 +1260,7 @@ public class view extends javax.swing.JFrame {
     
     //metodo que elimina los tokens "number" que incluye enteros, float y exponenciales no importando si son o no negativos
     private void nums(){
-        if(document.get(0).equals("number")){
+        if(document.get(0).equals("number")|| document.get(0).equals("1")|| document.get(0).equals("0")){
             document.remove(0);parserPos++;
         }
     }
@@ -1352,9 +1367,18 @@ public class view extends javax.swing.JFrame {
             checkParams();
             break;
         case "[":
-            //falta el closing braket
             document.remove(0);parserPos++;
             checkParams();
+            if (document.get(0).equals("]")) {
+                document.remove(0);parserPos++;
+            }
+            else{
+                line = Tdetail.get(parserPos).returnLine();
+                column = Tdetail.get(parserPos).returnColumn();
+                errorList.add("Missing: closing braket on line: " +line+" and column: " + column );
+                whileEnd();
+            }
+            expression();
             break;
         case "(":
             document.remove(0);parserPos++;
@@ -1379,7 +1403,7 @@ public class view extends javax.swing.JFrame {
             checkParams();
             break;
         case "{":
-            //falta el closing brace
+
             document.remove(0);parserPos++;
             if ("}".equals(document.get(0))) {
                 document.remove(0);parserPos++;
@@ -1387,7 +1411,7 @@ public class view extends javax.swing.JFrame {
             else{
                 line = Tdetail.get(parserPos).returnLine();
                 column = Tdetail.get(parserPos).returnColumn();
-                errorList.add("Missing: closing braket on line: " +line+" and column: " + column );
+                errorList.add("Missing: closing brace on line: " +line+" and column: " + column );
                 whileEnd();
             }
             break;
