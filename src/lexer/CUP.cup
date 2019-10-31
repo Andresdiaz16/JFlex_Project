@@ -1,0 +1,479 @@
+package lexer;
+import java_cup.runtime.Symbol;
+import java.util.ArrayList;
+parser code {:
+    private Symbol s;
+    
+    public ArrayList<ErrorJ> error = new ArrayList<ErrorJ>();
+
+    public Symbol gets(){
+        return this.s;
+    }
+    public void syntax_error(Symbol s){
+    this.s = s;
+    int linea = this.s.right;
+    int columna = this.s.left;
+    String value = (String)this.s.value;
+    ErrorJ Sintax_E = new ErrorJ(linea,columna,value);
+    error.add(Sintax_E);
+}
+    protected int error_sync_size () {
+        //System.out.println("error_sync_size was called.");
+        return 1; // not recommended by the CUP manual
+
+     // but we need recovery after the next successful shift
+    }
+
+:};
+    /*Terminal expression*/
+    terminal    INSERT,INTO,TOP,VALUES,PERCENT,Parentesis_de_apertura,Parentesis_de_cierre,Identificador,OUTPUT,DEFAULT,NULL,Punto,Coma,Punto_y_coma,GO,ROWGUIDCOL,
+                DELETE,FROM,JOIN,INNER,OUTER,LEFT,RIGHT,FULL,AS, ON ,Arroba, Igual,LOOP,HASH,MERGE,REMOTE,PIVOT,UNPIVOT, FOR, IN,UPDATE, SET,Suma,Resta,
+                Multiplicacion,Division,Porcentaje,String,Float,SELECT,ALL,DISTINCT,GROUP,BY,ORDER,HAVING,AND, ESCAPE,Diferente,Menor_o_igual,Mayor_o_igual,Mayor,Menor,ASC,DESC,
+                NOT, LIKE,BETWEEN, IS,OR,WHERE,AVG,COUNT,CONSTRAINT,IDENTITY,PRIMARY,KEY,CLUSTERED,NONCLUSTERED,UNIQUE,FOREIGN,REFERENCES,REPLICATION,
+                CHECK,INDEX,ACTION,CASCADE,DATABASE,NAME,COLLATE,NAMES,FILE,FLOAT,SIZE,INCLUDE,VIEW,CREATE,MODIFY,CURRENT,ADD,COLUMN,DROP,CHAR,BINARY,BLOB,BIT,VARCHAR,BOOLEAN,DATE,
+                YEAR,IMAGE,REAL,TIME,TIMESTAMP,CURSOR,TABLE,TEXT,BYTE,LONG,DOUBLE,NCHAR,MAX,USER,Corchete_de_apertura,Corchete_de_cierre,IF,EXISTS,INT,NO,INTEGER,SMALLINT,ALTER,TRUNCATE,Numeral,Doble_numeral,
+                BEGIN,TRANSACTION,TRAN,COMMIT,SAVEPOINT,ROLLBACK,DECLARE,LOCAL,GLOBAL,SCROLL,FORWARD_ONLY,STATIC,KEYSET,DYNAMIC,FAST_FORWARD,READ_ONLY,SCROLL_LOCKS,OPTIMISTIC,TYPE_WARNING,MODULAR,
+                FILEGROWTH,UNLIMITED,MAXSIZE,KB, MB, GB, TB,FILENAME,OF,MIN,SUM,NVARCHAR;
+    terminal Integer  Int ,Bit;
+
+    /*non terminal expressions*/
+    non terminal    INIT,EXPRESIONES,INSERT_F,VALORES,FIN,TOP_F,CONST,OBJECT_F,DELETE_F,FROM_F,WHERE_F,JOIN_F1,JOIN_F2,JHINT_F,PIVOT_F,
+                    UPDATE_F,SET_F,EXP_F,SET_EXP,AS_F,START, EMPTY_F,SELECT_F,HAVING_F,ORDER_F,EXPRE,ORDER_FUNC,and_or_not,predicate,
+                    signos,predicate_expression,search_condition,search_condition_without_match,search_condition_without_match_2,SELECT_FILES,GROUP_F,
+                    COMP,SELECT_FUNCTIONS,DISTINCT_F,CREATE_F,CreateA,CreateUser,CreateDB,CreateDBA,CreateDBB,Primary,FileSpecs,FileSpec,COLLATEDB,Optionals,Optional,Size,Sizew,Sizenw,Size_A,Maxsize,Maxsize_A,Filegrowth,Filegrowth_A, 
+                    CreateView,CreateIndex,CreateIndexA,ColumnIndex,ColumnIndexA,ColumnIndexB,IncludeIndex,OptionalOn,CreateTable,FileGroup,NFR,NFR1,NFR2,CNC,CNCA,ColumnDef,ColumnDefZ,ColumnDefY,ColumnDefX,ColumnDefW,ColumnDefV,ColumnDefA,
+                    ColumnDefD,ColumnDefE,ALTERDATABASE,database_name,alter_database_sentencia,alter_column,alter_column_sentencia,constraint_type,null_notnull,foreign_key,OBJECT_FDROP,TIPODATO,ALTERTABLE,ALTERUSER,alter_index,ALTERVIEW,
+                    alter_view,ColumnConstrC,DROPDATABASE,DROPTABLE,DROPUSER,DROPINDEX,drop_relational_or_xml_or_spatial_index,DROPVIEW,TRUNCATETABLE,ALTERINDEX,BEGINTRANSACTION,CursorDeclare,CursorDeclarea,CursorDeclareb,CursorDeclarec,
+                    TableIndex,ColumnDefG,CursorDeclaref,CursorDeclareg,ColumnListA,ColumnListB,Procedure,Function,TableConstr,TableConstrA,TableConstrB,TableConstrC,TableConstrD,TableConstrE,ColumnConstr,ColumnConstrA,ColumnConstrB,
+                    ColumnConstrD,ColumnConstrE,ColumnConstrF,ColumnConstrG,ColumnConstrH,ColumnConstrI,SearchCondition,SearchConditionA,OrderB,ColumnDefH,ColumnDefF,Predicate,COMMITTCL,SAVEPOINTTCL,ROLLBACKTCL,CursorDeclared,CursorDeclaree;
+    
+    
+    /*PRECEDENCE*/                
+    precedence left Punto_y_coma,GO;
+    precedence left AND,OR;
+    precedence right Coma,DESC,ASC;
+    precedence left NULL,IS;
+    precedence left  Suma , Resta;
+    precedence left  Multiplicacion, Division,Porcentaje;
+    precedence left  Parentesis_de_apertura,Parentesis_de_cierre;
+    
+    start with INIT;
+    
+    INIT ::= START;
+    START ::= EXPRESIONES | EMPTY_F;
+
+    EXPRESIONES ::= INSERT_F START | 
+                    DELETE_F START|
+                    UPDATE_F START|
+                    SELECT_F START|
+                    CREATE_F START|
+                    ALTERDATABASE  START|
+                    ALTERTABLE START|
+                    ALTERUSER START|
+                    ALTERVIEW START |
+                    ALTERINDEX START|
+                    DROPDATABASE START|
+                    DROPTABLE START|
+                    DROPUSER START|
+                    DROPINDEX START|
+                    DROPVIEW START|
+                    TRUNCATETABLE START|
+                    BEGINTRANSACTION START|
+                    CursorDeclare START|
+                    ROLLBACKTCL START|
+                    COMMITTCL START|
+                    SAVEPOINTTCL START;
+    /*INSERT FUNCTION*/
+    INSERT_F ::=        INSERT TOP_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre OUTPUT VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT TOP_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre OUTPUT VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT TOP_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT TOP_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre OUTPUT VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre OUTPUT VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN | 
+                        INSERT INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre DEFAULT VALUES FIN |
+                        INSERT TOP_F INTO OBJECT_F OUTPUT VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT TOP_F INTO OBJECT_F OUTPUT VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT TOP_F INTO OBJECT_F VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT TOP_F INTO OBJECT_F VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT INTO OBJECT_F OUTPUT VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT INTO OBJECT_F OUTPUT VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT INTO OBJECT_F VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN | 
+                        INSERT INTO OBJECT_F VALUES DEFAULT VALUES FIN |
+                        INSERT TOP_F OBJECT_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre OUTPUT VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT TOP_F OBJECT_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre OUTPUT VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT TOP_F OBJECT_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT TOP_F OBJECT_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT OBJECT_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre OUTPUT VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT OBJECT_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre OUTPUT VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT OBJECT_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN | 
+                        INSERT OBJECT_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT OBJECT_F INTO OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre DEFAULT VALUES FIN |
+                        INSERT TOP_F OBJECT_F INTO OBJECT_F OUTPUT VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT TOP_F OBJECT_F INTO OBJECT_F OUTPUT VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT TOP_F OBJECT_F INTO OBJECT_F VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT TOP_F OBJECT_F INTO OBJECT_F VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN |
+                        INSERT OBJECT_F OUTPUT OBJECT_FDROP INTO OBJECT_F  VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN |
+                        INSERT OBJECT_F OUTPUT OBJECT_FDROP INTO OBJECT_F  VALUES Parentesis_de_apertura DEFAULT VALUES Parentesis_de_cierre FIN|
+                        INSERT OBJECT_F INTO OBJECT_F VALUES Parentesis_de_apertura VALORES Parentesis_de_cierre FIN | 
+                        INSERT OBJECT_F INTO OBJECT_F VALUES DEFAULT VALUES FIN | error FIN;
+    VALORES ::= DEFAULT Coma VALORES | NULL Coma VALORES | CONST Coma VALORES | DEFAULT | NULL | CONST ;
+/*DELETE FUNCTION*/
+DELETE_F ::= DELETE TOP_F FROM OBJECT_F OUTPUT FROM_F WHERE_F FIN |
+			 DELETE FROM OBJECT_F OUTPUT FROM_F WHERE_F FIN | 
+			 DELETE TOP_F FROM OBJECT_F  FROM_F WHERE_F FIN |
+			 DELETE FROM OBJECT_F  FROM_F WHERE_F FIN | 
+			 DELETE TOP_F FROM OBJECT_F OUTPUT FROM_F FIN |
+			 DELETE FROM OBJECT_F OUTPUT FROM_F FIN | 
+			 DELETE TOP_F FROM OBJECT_F  FROM_F FIN |
+			 DELETE FROM OBJECT_F FROM_F FIN | 
+                         DELETE TOP_F FROM OBJECT_F OUTPUT FIN |
+			 DELETE FROM OBJECT_F OUTPUT FIN | 
+			 DELETE TOP_F FROM OBJECT_F FIN |
+			 DELETE FROM OBJECT_F FIN | DELETE error FIN ;
+/*UPDATE FUNCTION*/
+UPDATE_F  ::=            UPDATE TOP_F OBJECT_F SET_F OUTPUT FROM_F WHERE_F FIN |
+			 UPDATE TOP_F OBJECT_F SET_F OUTPUT FROM_F FIN |
+			 UPDATE OBJECT_F SET_F OUTPUT FROM_F WHERE_F FIN |
+			 UPDATE OBJECT_F SET_F OUTPUT FROM_F FIN |
+			 UPDATE TOP_F OBJECT_F SET_F FROM_F WHERE_F FIN |
+			 UPDATE TOP_F OBJECT_F SET_F FROM_F FIN|
+			 UPDATE OBJECT_F SET_F FROM_F WHERE_F FIN |
+			 UPDATE OBJECT_F SET_F FROM_F FIN |
+                         UPDATE TOP_F OBJECT_F SET_F OUTPUT WHERE_F FIN |
+			 UPDATE TOP_F OBJECT_F SET_F OUTPUT FIN |
+			 UPDATE OBJECT_F SET_F OUTPUT  WHERE_F FIN |
+			 UPDATE OBJECT_F SET_F OUTPUT FIN |
+			 UPDATE TOP_F OBJECT_F SET_F WHERE_F FIN |
+			 UPDATE TOP_F OBJECT_F SET_F  FIN|
+			 UPDATE OBJECT_F SET_F  WHERE_F FIN |
+			 UPDATE OBJECT_F SET_F FIN | UPDATE error FIN;
+SET_F	 ::= SET SET_EXP;
+
+SET_EXP	 ::= OBJECT_F Igual DEFAULT Coma SET_EXP |
+			 OBJECT_F Igual NULL Coma SET_EXP|
+			 OBJECT_F Igual EXP_F Coma SET_EXP |
+			 OBJECT_F Igual DEFAULT|
+			 OBJECT_F Igual NULL|
+			 OBJECT_F Igual EXP_F;
+EXP_F	 ::=  OBJECT_F | CONST | 
+			 EXP_F Suma EXP_F | EXP_F Resta EXP_F |
+			 EXP_F Multiplicacion EXP_F | EXP_F Division EXP_F|
+			 EXP_F Porcentaje EXP_F |Parentesis_de_apertura EXP_F Parentesis_de_cierre;
+
+/*SELECT FUNCTION*/
+
+SELECT_F ::= 	SELECT ALL TOP_F SELECT_FILES INTO FROM_F WHERE_F GROUP_F ORDER_F FIN | 
+				SELECT DISTINCT TOP_F SELECT_FILES INTO FROM_F WHERE_F GROUP_F ORDER_F FIN | 
+				SELECT TOP_F SELECT_FILES INTO FROM_F WHERE_F GROUP_F ORDER_F FIN |
+				
+				/*SIN TOP*/				
+				SELECT ALL SELECT_FILES INTO FROM_F WHERE_F GROUP_F ORDER_F FIN | 
+				SELECT DISTINCT SELECT_FILES INTO FROM_F WHERE_F GROUP_F ORDER_F FIN | 
+				SELECT SELECT_FILES INTO FROM_F WHERE_F GROUP_F ORDER_F FIN |
+				
+				/*Sentencias sin INTO*/
+				SELECT ALL TOP_F SELECT_FILES FROM_F WHERE_F GROUP_F ORDER_F FIN | 
+				SELECT DISTINCT TOP_F SELECT_FILES  FROM_F WHERE_F GROUP_F ORDER_F FIN | 
+				SELECT TOP_F SELECT_FILES FROM_F WHERE_F GROUP_F ORDER_F FIN |
+				
+				/*SIN TOP*/				
+				SELECT ALL SELECT_FILES  FROM_F WHERE_F GROUP_F ORDER_F FIN | 
+				SELECT DISTINCT SELECT_FILES  FROM_F WHERE_F GROUP_F ORDER_F FIN | 
+				SELECT SELECT_FILES FROM_F WHERE_F GROUP_F ORDER_F FIN;
+
+SELECT_FILES ::= Multiplicacion | OBJECT_F | OBJECT_F AS_F | SELECT_FUNCTIONS |OBJECT_F Coma SELECT_FILES|
+                                OBJECT_F AS_F Coma SELECT_FILES | SELECT_FUNCTIONS Coma SELECT_FILES|SELECT error;
+SELECT_FUNCTIONS ::=            AVG Parentesis_de_apertura OBJECT_F Parentesis_de_cierre AS_F|
+                                AVG Parentesis_de_apertura OBJECT_F Parentesis_de_cierre |
+                                COUNT Parentesis_de_apertura DISTINCT_F OBJECT_F Parentesis_de_cierre AS_F |
+                                COUNT Parentesis_de_apertura DISTINCT_F OBJECT_F Parentesis_de_cierre |
+                                COUNT Parentesis_de_apertura Multiplicacion Parentesis_de_cierre AS_F |
+                                COUNT Parentesis_de_apertura Multiplicacion Parentesis_de_cierre|
+                                COUNT Parentesis_de_apertura Int Parentesis_de_cierre AS_F |
+                                COUNT Parentesis_de_apertura Int Parentesis_de_cierre|
+                                MIN Parentesis_de_apertura OBJECT_F Parentesis_de_cierre AS_F|
+                                MIN Parentesis_de_apertura OBJECT_F Parentesis_de_cierre |
+                                MAX Parentesis_de_apertura OBJECT_F Parentesis_de_cierre AS_F|
+                                MAX Parentesis_de_apertura OBJECT_F Parentesis_de_cierre |
+                                SUM Parentesis_de_apertura OBJECT_F Parentesis_de_cierre AS_F|
+                                SUM Parentesis_de_apertura OBJECT_F Parentesis_de_cierre |EMPTY_F;
+DISTINCT_F ::=  ALL | DISTINCT | EMPTY_F;
+GROUP_F  ::= GROUP BY OBJECT_F HAVING_F | EMPTY_F;
+HAVING_F ::= HAVING EXPRE | EMPTY_F;
+EXPRE  	 ::= OBJECT_F COMP CONST;
+COMP	 ::= Mayor | Menor | Igual;
+ORDER_F  ::= ORDER BY ORDER_FUNC | EMPTY_F;
+ORDER_FUNC ::=  OrderB ORDER_FUNC| ORDER_FUNC OrderB| Identificador Punto Identificador|Identificador Punto Identificador Punto Identificador|ORDER_FUNC Coma|Identificador;
+OrderB ::= ASC | DESC ;
+
+
+/*CREATE STATEMENTS*/
+
+CREATE_F::= CREATE CreateA;
+
+    CreateA ::= CreateTable | CreateDB | CreateIndex | CreateUser | CreateView | Procedure | Function;
+
+    CreateUser ::= USER Identificador;
+
+    CreateDB ::= DATABASE Identificador CreateDBA;
+
+    CreateDBA ::= CreateDBB COLLATEDB;
+
+    CreateDBB ::= ON Primary FileSpecs | EMPTY_F;
+
+    Primary ::= PRIMARY | EMPTY_F;
+
+    FileSpecs ::= FileSpec Coma FileSpecs | FileSpec;
+
+    FileSpec ::= Parentesis_de_apertura NAME Igual String Coma FILENAME Igual String Optionals Parentesis_de_cierre;
+
+    COLLATEDB ::= COLLATE Identificador | EMPTY_F;
+
+    Optionals ::= Coma Optional Optionals|EMPTY_F;
+
+    Optional ::= Size | Maxsize | Filegrowth;
+
+    Size ::= Sizew | Sizenw;
+
+    Sizew ::= SIZE Igual Int Size_A;
+    
+    Sizenw ::= SIZE Igual Int;
+
+    Size_A ::= KB| MB | GB | TB;
+
+    Maxsize ::= MAXSIZE Igual Maxsize_A;
+
+    Maxsize_A ::= Int Size_A | UNLIMITED;
+
+    Filegrowth ::= FILEGROWTH Igual Int Filegrowth_A;
+
+    Filegrowth_A ::= Size_A | MODULAR | EMPTY_F;
+
+    CreateView ::= VIEW OBJECT_F AS SELECT_F;
+
+    CreateIndex ::= CreateIndexA ColumnConstrC INDEX Identificador ON OBJECT_F ColumnIndex IncludeIndex WHERE_F OptionalOn;
+
+    CreateIndexA ::= UNIQUE| EMPTY_F ;
+
+    ColumnIndex ::= Parentesis_de_apertura ColumnIndexA Parentesis_de_cierre;
+
+    ColumnIndexA ::= Identificador ORDER_F ColumnIndexB;
+
+    ColumnIndexB ::= Coma Identificador ORDER_F ColumnIndexB | EMPTY_F;
+
+    IncludeIndex ::= INCLUDE Parentesis_de_apertura OBJECT_F Parentesis_de_cierre | EMPTY_F;
+
+    OptionalOn ::= ON OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre | EMPTY_F;
+
+    CreateTable ::= TABLE OBJECT_F Parentesis_de_apertura CNC CNCA Parentesis_de_cierre FileGroup;
+
+    FileGroup ::= ON PRIMARY|EMPTY_F ;
+
+    NFR ::= NOT NFR1|EMPTY_F ;
+    
+    NFR1 ::= FOR REPLICATION NFR2| NULL;
+    
+    NFR2 ::= NOT ColumnDefG|EMPTY_F;
+
+    CNC ::= ColumnDef | TableConstr | TableIndex;
+
+    CNCA ::= Coma CNC CNCA | EMPTY_F;
+
+    TableConstr ::= ColumnConstrA TableConstrA;
+    
+    TableConstrA ::= PRIMARY KEY ColumnConstrC TableConstrB
+	| UNIQUE ColumnConstrC TableConstrB
+	| FOREIGN KEY TableConstrD REFERENCES OBJECT_F ColumnConstrE ColumnConstrF NFR
+	| CHECK NFR Parentesis_de_apertura SearchCondition Parentesis_de_cierre;
+
+    TableConstrB ::= Parentesis_de_apertura OBJECT_F OrderB TableConstrC Parentesis_de_cierre;
+
+    TableConstrC ::= Coma OBJECT_F OrderB TableConstrC | EMPTY_F;
+
+    TableConstrD ::= Parentesis_de_apertura OBJECT_F TableConstrE Parentesis_de_cierre;
+
+    TableConstrE ::= Coma OBJECT_F TableConstrE | EMPTY_F;
+
+    TableIndex ::= INDEX OBJECT_F ColumnConstrC TableConstrB;
+
+    ColumnDef ::= OBJECT_F TIPODATO ColumnDefA ColumnDefZ;
+
+    ColumnDefZ ::= CONSTRAINT OBJECT_F ColumnDefY|ColumnDefY| EMPTY_F;
+
+    ColumnDefY ::= DEFAULT ColumnDefD ColumnDefE NFR ColumnDefH ColumnConstr|
+                   IDENTITY ColumnDefF NFR ColumnDefH ColumnConstr|ColumnDefX ColumnDefW ColumnDefH ColumnConstr|ROWGUIDCOL ColumnConstr|
+                   ColumnConstrB ColumnConstr;
+    
+    ColumnDefX ::= NOT| EMPTY_F;
+
+     ColumnDefF ::= Parentesis_de_apertura Int Coma Int Parentesis_de_cierre | EMPTY_F;
+    ColumnDefW ::= NULL|FOR REPLICATION ColumnDefV;
+
+    ColumnDefV ::= NOT NULL| NULL| EMPTY_F;
+    ColumnDefG ::= NULL | EMPTY_F;
+    ColumnDefH ::= ROWGUIDCOL | EMPTY_F;
+    ColumnDefA ::= COLLATE OBJECT_F | EMPTY_F;
+
+    ColumnDefD ::= Int | Float | String | Bit | NULL;
+
+    ColumnDefE ::= IDENTITY ColumnDefF | EMPTY_F;
+
+    ColumnConstr ::= ColumnConstrA ColumnConstrB ColumnConstr | EMPTY_F;
+
+    ColumnConstrA ::= CONSTRAINT OBJECT_F | EMPTY_F;
+    
+    ColumnConstrB ::= PRIMARY KEY ColumnConstrC | PRIMARY KEY ColumnConstrC Parentesis_de_apertura OBJECT_F Parentesis_de_cierre
+        | UNIQUE ColumnConstrC
+	| ColumnConstrD REFERENCES OBJECT_F ColumnConstrE ColumnConstrF NFR
+	| CHECK NFR Parentesis_de_apertura SearchCondition Parentesis_de_cierre;
+
+    ColumnConstrC ::= CLUSTERED | NONCLUSTERED | EMPTY_F;
+
+    ColumnConstrD ::= FOREIGN KEY | EMPTY_F;
+
+    ColumnConstrE ::= Parentesis_de_apertura OBJECT_F Parentesis_de_cierre | EMPTY_F;
+
+    ColumnConstrF ::= ON ColumnConstrG ColumnConstrF| EMPTY_F;
+
+    ColumnConstrG ::= DELETE ColumnConstrI|UPDATE ColumnConstrI;
+
+    ColumnConstrH ::= NULL | DEFAULT;
+
+    ColumnConstrI ::= CASCADE | SET ColumnConstrH;
+
+
+SearchCondition ::= NOT Predicate SearchConditionA|Predicate SearchConditionA| Parentesis_de_apertura SearchCondition Parentesis_de_cierre SearchConditionA;
+
+SearchConditionA ::= AND SearchCondition|OR SearchCondition|EMPTY_F ;
+
+/*ALTER STATEMENTS*/
+ALTERDATABASE ::=       ALTER DATABASE database_name alter_database_sentencia FIN ;
+database_name ::=       Identificador | CURRENT;
+alter_database_sentencia ::= MODIFY NAME Igual Identificador | COLLATE Identificador ;
+
+ALTERTABLE ::=          ALTER TABLE OBJECT_F alter_column alter_column_sentencia FIN | ALTER TABLE OBJECT_F alter_column FIN | ALTER TABLE OBJECT_F FIN | ALTER TABLE OBJECT_F ADD Identificador TIPODATO null_notnull FIN | ALTER TABLE OBJECT_F ADD Identificador TIPODATO null_notnull CONSTRAINT Identificador constraint_type FIN |
+                        ALTER TABLE OBJECT_F ADD CONSTRAINT Identificador FIN | ALTER TABLE OBJECT_F ADD CONSTRAINT Identificador constraint_type FIN | ALTER TABLE OBJECT_F DROP COLUMN Identificador FIN | ALTER TABLE OBJECT_F DROP Identificador FIN | ALTER TABLE OBJECT_F DROP CONSTRAINT Identificador FIN;
+alter_column ::=        ALTER COLUMN Identificador;
+alter_column_sentencia ::= TIPODATO Identificador COLLATE Identificador NULL | TIPODATO Identificador COLLATE Identificador NOT NULL | TIPODATO Identificador COLLATE Identificador | COLLATE Identificador NULL | COLLATE Identificador NOT NULL | COLLATE Identificador | TIPODATO Identificador | NULL | NOT NULL;
+constraint_type ::=     PRIMARY KEY | UNIQUE | PRIMARY KEY CLUSTERED | PRIMARY KEY NONCLUSTERED | UNIQUE CLUSTERED | UNIQUE NONCLUSTERED | foreign_key;
+null_notnull ::=        NULL | NOT NULL;
+foreign_key ::=         FOREIGN KEY Parentesis_de_apertura Identificador Parentesis_de_cierre;
+
+ALTERUSER ::= ALTER USER Identificador FIN;
+
+ALTERINDEX ::= ALTER INDEX alter_index ON OBJECT_F FIN;
+alter_index ::= Identificador | ALL;
+
+ALTERVIEW ::= ALTER VIEW OBJECT_F AS SELECT_F FIN | ALTER VIEW OBJECT_F alter_view AS SELECT_F FIN;
+alter_view ::= Parentesis_de_apertura alter_column Parentesis_de_cierre ;
+
+/*DROP STATEMENTS*/
+DROPDATABASE ::=  DROP DATABASE OBJECT_FDROP FIN|
+                  DROP DATABASE Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_FDROP FIN;
+
+DROPTABLE ::= DROP TABLE OBJECT_FDROP FIN|
+              DROP TABLE Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_FDROP FIN;
+
+DROPUSER ::= DROP USER Identificador FIN|
+             DROP USER Corchete_de_apertura IF EXISTS Corchete_de_cierre Identificador FIN;
+
+DROPINDEX ::= DROP INDEX drop_relational_or_xml_or_spatial_index FIN|
+              DROP INDEX Corchete_de_apertura IF EXISTS Corchete_de_cierre drop_relational_or_xml_or_spatial_index FIN|
+              DROP INDEX OBJECT_F FIN|
+              DROP INDEX Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_F FIN;
+drop_relational_or_xml_or_spatial_index ::= Identificador ON OBJECT_F Coma Identificador ON OBJECT_F| Identificador ON OBJECT_F;
+
+DROPVIEW ::= DROP VIEW OBJECT_FDROP FIN|
+             DROP VIEW Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_FDROP FIN;
+
+/*TRUNCATE*/
+
+TRUNCATETABLE ::= TRUNCATE TABLE OBJECT_F FIN;
+
+
+/*FROM DECLARATION*/
+FROM_F  ::=              FROM OBJECT_F AS_F JOIN_F1 |
+			 FROM OBJECT_F AS_F |
+			 FROM OBJECT_F JOIN_F1|
+			 FROM OBJECT_F | 
+			 FROM PIVOT_F AS_F|
+			 FROM PIVOT_F;
+PIVOT_F ::=  OBJECT_F AS_F PIVOT Parentesis_de_apertura  OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre FOR Identificador IN Parentesis_de_apertura OBJECT_F Parentesis_de_cierre Parentesis_de_cierre AS_F |
+			 OBJECT_F PIVOT Parentesis_de_apertura  OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre FOR Identificador IN Parentesis_de_apertura OBJECT_F Parentesis_de_cierre Parentesis_de_cierre AS_F |
+			 OBJECT_F AS_F PIVOT Parentesis_de_apertura  OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre FOR Identificador IN Parentesis_de_apertura OBJECT_F Parentesis_de_cierre Parentesis_de_cierre |
+			 OBJECT_F PIVOT Parentesis_de_apertura  OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre FOR Identificador IN Parentesis_de_apertura OBJECT_F Parentesis_de_cierre Parentesis_de_cierre |
+			 OBJECT_F UNPIVOT Parentesis_de_apertura  OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre FOR Identificador IN Parentesis_de_apertura OBJECT_F Parentesis_de_cierre Parentesis_de_cierre AS_F |
+			 OBJECT_F UNPIVOT Parentesis_de_apertura  OBJECT_F Parentesis_de_apertura OBJECT_F Parentesis_de_cierre FOR Identificador IN Parentesis_de_apertura OBJECT_F Parentesis_de_cierre Parentesis_de_cierre; 
+AS_F    ::=  AS Identificador | Identificador;
+JOIN_F1 ::=              JOIN_F2 OBJECT_F AS_F ON OBJECT_F Igual OBJECT_F |
+			 JOIN_F2 OBJECT_F  AS_F ON OBJECT_F Igual OBJECT_F JOIN_F1|
+                         JOIN_F2 OBJECT_F  ON OBJECT_F Igual OBJECT_F |
+			 JOIN_F2 OBJECT_F  ON OBJECT_F Igual OBJECT_F JOIN_F1;
+JOIN_F2 ::=  INNER JOIN JHINT_F| 
+			 FULL OUTER JOIN JHINT_F | 
+			 LEFT OUTER JOIN  JHINT_F| 
+			 RIGHT OUTER JOIN JHINT_F|
+			 INNER JOIN | 
+			 FULL OUTER JOIN | 
+			 LEFT OUTER JOIN | 
+			 RIGHT OUTER JOIN;
+JHINT_F ::= LOOP | HASH | MERGE | REMOTE ;
+WHERE_F ::= WHERE search_condition  |  EMPTY_F;
+search_condition ::= search_condition_without_match |search_condition_without_match AND search_condition_without_match |search_condition_without_match OR search_condition_without_match |EMPTY_F ;
+search_condition_without_match ::=  Parentesis_de_apertura search_condition_without_match_2 Parentesis_de_cierre | search_condition_without_match_2 Coma search_condition_without_match_2 | search_condition_without_match_2;
+search_condition_without_match_2 ::= and_or_not predicate | predicate and_or_not predicate | predicate ;
+predicate ::= predicate_expression signos predicate_expression | ESCAPE String | predicate_expression signos;
+predicate_expression ::= OBJECT_F | Int | Float | String ;
+signos ::= IS NOT NULL |Igual | Mayor | Menor | Diferente | Menor_o_igual | Mayor_o_igual | NOT LIKE | LIKE | BETWEEN | NOT BETWEEN |NULL| IS NULL | IS | IS NOT|NOT;
+and_or_not ::= AND | OR | NOT | AND NOT | OR NOT;
+
+/*TRANSACTION*/
+BEGINTRANSACTION ::= BEGIN TRANSACTION OBJECT_F FIN | BEGIN TRAN OBJECT_F FIN | BEGIN OBJECT_F FIN | BEGIN TRAN FIN ;
+
+COMMITTCL ::= COMMIT TRANSACTION OBJECT_F FIN | COMMIT TRAN OBJECT_F FIN | COMMIT OBJECT_F FIN | COMMIT TRAN FIN;
+
+SAVEPOINTTCL ::= SAVEPOINT OBJECT_F FIN;
+
+ROLLBACKTCL ::= ROLLBACK TRANSACTION OBJECT_F FIN | ROLLBACK TRAN OBJECT_F FIN;
+
+
+/*CURSORES*/
+
+    CursorDeclare ::= DECLARE OBJECT_F CURSOR CursorDeclarea CursorDeclareb CursorDeclarec CursorDeclared CursorDeclaree FOR SELECT_F CursorDeclaref;
+    
+    CursorDeclarea ::= LOCAL|GLOBAL|EMPTY_F;
+    
+    CursorDeclareb ::= SCROLL|FORWARD_ONLY|EMPTY_F;
+    
+    CursorDeclarec ::= STATIC|KEYSET|DYNAMIC|FAST_FORWARD|EMPTY_F;
+    
+    CursorDeclared ::= READ_ONLY|SCROLL_LOCKS|OPTIMISTIC|EMPTY_F;
+    
+    CursorDeclaree ::= TYPE_WARNING|EMPTY_F;
+    
+    CursorDeclaref ::= FOR UPDATE CursorDeclareg|EMPTY_F;
+    
+    CursorDeclareg ::= OF ColumnListA|EMPTY_F;
+
+    ColumnListA ::= Identificador ColumnListB;
+
+    ColumnListB ::= Coma Identificador ColumnListB | EMPTY_F;
+
+
+/*GENERAL PRODUCTIONS*/                    
+TOP_F ::= TOP Parentesis_de_apertura Int Parentesis_de_cierre | TOP Parentesis_de_apertura Int Parentesis_de_cierre PERCENT|
+          TOP Int | TOP  Int  PERCENT ;
+
+TIPODATO ::= CHAR | CHAR Parentesis_de_apertura Int Parentesis_de_cierre | BINARY | BINARY Parentesis_de_apertura Int Parentesis_de_cierre |
+             BLOB | BLOB Parentesis_de_apertura Int Parentesis_de_cierre | BIT | BIT Parentesis_de_apertura Int Parentesis_de_cierre | SMALLINT |
+             SMALLINT Parentesis_de_apertura Int Parentesis_de_cierre | INT | INT Parentesis_de_apertura Int Parentesis_de_cierre | INTEGER | INTEGER Parentesis_de_apertura Int Parentesis_de_cierre |
+             VARCHAR | VARCHAR Parentesis_de_apertura Int Parentesis_de_cierre | VARCHAR Parentesis_de_apertura MAX Parentesis_de_cierre | FLOAT | FLOAT Parentesis_de_apertura Int Parentesis_de_cierre |
+             BOOLEAN | DATE | YEAR | IMAGE | REAL | TIME | TIMESTAMP | CURSOR | TABLE | TEXT | BYTE | LONG TIPODATO | DOUBLE TIPODATO | NCHAR TIPODATO | IDENTITY TIPODATO | NVARCHAR | NVARCHAR Parentesis_de_apertura Int Parentesis_de_cierre |NVARCHAR Parentesis_de_apertura MAX Parentesis_de_cierre;
+OBJECT_FDROP ::=  OBJECT_F Coma OBJECT_F Coma OBJECT_FDROP | OBJECT_F Coma OBJECT_F | OBJECT_F ;
+
+OBJECT_F  ::= Identificador |Identificador Punto Identificador | Identificador Punto Identificador Punto Identificador |  Arroba Identificador | Numeral Identificador | Doble_numeral Identificador | Identificador Coma OBJECT_F|Parentesis_de_apertura OBJECT_F Parentesis_de_cierre ;
+CONST ::= Int|String|Bit|Float;
+EMPTY_F ::=;
+FIN ::= Punto_y_coma | GO | GO Punto_y_coma | Punto_y_coma GO;

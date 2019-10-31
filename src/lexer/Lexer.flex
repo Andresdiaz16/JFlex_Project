@@ -131,4 +131,3 @@ column = yycolumn;
 {ErrorCadena} {line = yyline; column = yycolumn;return ERRORSTRING;}
 {ErrorLinea} {line = yyline; column = yycolumn;return ErrorLINEA;}
 . {line = yyline; column = yycolumn; return ErrorToken;}
-

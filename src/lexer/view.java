@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +27,7 @@ import javax.swing.JFileChooser;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java_cup.runtime.Symbol;
 
 /*
  /* @author Andres Diaz
@@ -50,6 +52,9 @@ public class view extends javax.swing.JFrame {
     String userPath;
     String fileName;
     String[] splitString;
+    String[] arrayString = {"-parser" , "sintax",System.getProperty("user.dir")+"\\src\\lexer\\CUP.cup"};
+    String ST;
+    ArrayList<ErrorJ> erroresL = new ArrayList<ErrorJ>();
     
     public view() {
         //SETS THE LOOK AND FEEL OF WINDOWS
@@ -71,7 +76,6 @@ public class view extends javax.swing.JFrame {
         //GETS THE CURRENT DIRECTORY WHERE THE PROJECT IS CURRENTLY ON FOR FUTURE USE
         userPath = System.getProperty("user.dir");
         //SETS THE TEXT THAT WILL APPEAR UPON START
-        jLabel1.setText("PLEASE GENERATE THE JAVA FILE");
         //GETS THE DIMENTIONS OF THE USER SCREEN
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         //INITIALIZE THE  HASHMAP THAT WILL BE USE A DICTIONARY TO GET THE PUNCTUATION DESC OR VALUE
@@ -136,10 +140,13 @@ public class view extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jButton1.setText("Analyze File");
+        jButton1.setText("Cargar Archivo");
         jButton1.setToolTipText("Opens the .sql or .txt ile you want to analyze");
         jButton1.setFocusPainted(false);
         jButton1.setFocusable(false);
@@ -170,21 +177,37 @@ public class view extends javax.swing.JFrame {
             }
         });
 
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane1.setViewportView(jTextArea1);
+
+        jButton4.setText("Analizar");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 598, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(20, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -194,10 +217,17 @@ public class view extends javax.swing.JFrame {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(16, 16, 16)
-                .addComponent(jLabel1)
-                .addContainerGap(21, Short.MAX_VALUE))
+                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(105, 105, 105)
+                        .addComponent(jLabel1)
+                        .addContainerGap(428, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 496, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(21, 21, 21))))
         );
 
         pack();
@@ -208,6 +238,7 @@ public class view extends javax.swing.JFrame {
         //CREATES A TEMPORARY FILE OF THE .JAVA THAT WAS GENERATED OF THE .LEXER FILE IF IT EXISTS
         File tempFile = new File(userPath+"\\src\\lexer\\Analyzer.java");
         boolean exists = tempFile.exists();
+
         /*
         COMPARES IF THE .JAVA FILE EXIST OR NOT
         IF IT DOESNT EXIST IT CREATES ONE IF IT DOES EXIST THEN
@@ -217,13 +248,21 @@ public class view extends javax.swing.JFrame {
         */
         if (exists) {
             tempFile.delete();
-            lGen = new Lexer_Generator(userPath+"/src/lexer/Lexer.flex");
-            lGen.GenerateLexer();
+            lGen = new Lexer_Generator(userPath+"/src/lexer/Lexer.flex",userPath+"/src/lexer/Cup_Flex.flex",arrayString);
+            try {
+                lGen.GenerateLexer();
+            } catch (Exception ex) {
+                Logger.getLogger(view.class.getName()).log(Level.SEVERE, null, ex);
+            }
             jLabel1.setText("RULES ADDED");
         }
         else{
-            lGen = new Lexer_Generator(userPath+"/src/lexer/Lexer.flex");
-            lGen.GenerateLexer();
+            lGen = new Lexer_Generator(userPath+"/src/lexer/Lexer.flex",userPath+"/src/lexer/Cup_Flex.flex",arrayString);
+            try {
+                lGen.GenerateLexer();
+            } catch (Exception ex) {
+                Logger.getLogger(view.class.getName()).log(Level.SEVERE, null, ex);
+            }
             jLabel1.setText("RULES ADDED");
         }
     }//GEN-LAST:event_jButton2ActionPerformed
@@ -245,11 +284,14 @@ public class view extends javax.swing.JFrame {
             try {
                 BufferedReader reader = new BufferedReader(new FileReader(fld));
                 Analyzer lexer = new Analyzer(reader);
+                File archivo = new File(fld.getAbsolutePath());
+                ST = new String(Files.readAllBytes(archivo.toPath()));
                 splitString = fld.getName().split("\\.");
                 fileName = splitString[0];
                 String line = "";
                 File filePath = new File(userPath+"\\src\\lexer\\Output\\" +fileName +".out");
                 boolean fileEX = filePath.exists();
+
                 if(fileEX){
                     filePath.delete();
                     outFile = Paths.get(userPath+"\\src\\lexer\\Output\\" +fileName+".out");
@@ -259,82 +301,7 @@ public class view extends javax.swing.JFrame {
                     outFile = Paths.get(userPath+"\\src\\lexer\\Output\\"+fileName+".out");
                     Files.createFile(outFile);
                 }
-                do{
-                    Tokens token = lexer.yylex();
-                    if(token == null){
-                    //return EOF
-                    Files.write(outFile, lines,StandardCharsets.UTF_8, StandardOpenOption.APPEND);
-                    lines.clear();
-                    Runtime.getRuntime().exec("explorer.exe /open, "+outFile);
-                    return;
-                    }
-                    else{
-                        switch(token){
-                            //escribir el .out
-                            case RESERVADA:
-                               finalColumn = lexer.column + lexer.yylength()-1;
-                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: " +lexer.yytext()+" TOKEN: RESERVADA, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                               finalColumn = 0;
-                                break;
-                            case PUNTUACION:
-                               finalColumn = lexer.column + lexer.yylength()-1;
-                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+ lexer.yytext()+" TOKEN:"+ symbolsTable.get(lexer.yytext()) +" "+", ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                               finalColumn = 0;
-                                break;
-                            case ENTERO:
-                               finalColumn = lexer.column + lexer.yylength()-1;
-                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+ lexer.yytext()+" TOKEN: ENTERO, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                               finalColumn = 0;
-                                break;
-                            case IDENTIFICADOR:
-                               finalColumn = lexer.column + lexer.yylength()-1;
-                               if(lexer.yylength() > 31){
-                                   ident = lexer.yytext().substring(0,31);
-                                   lines.add("IDENTIFIER TOO LONG CUTTED DOWN TO 31 CHARS ON LINE: "+ (lexer.line+1) +" FOUND: "+ ident+" TOKEN: IDENTIFICADOR, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                                   ident = "";
-                               }else{
-                                   lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+ lexer.yytext()+" TOKEN: IDENTIFICADOR, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                               }
-                               finalColumn = 0;                                
-                                break;
-                            case ErrorToken:
-                               finalColumn = lexer.column + lexer.yylength()-1;
-                               lines.add("ERROR!!! LINE: "+ (lexer.line+1) +" FOUND: "+ lexer.yytext()+" TOKEN: ERROR TOKEN NOT SPECIFIED, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                               finalColumn = 0; 
-                                break;
-                            case ErrorLINEA:
-                               finalColumn = lexer.column + lexer.yylength()-1;
-                               lines.add("ERROR COMMENT NOT FINALIZED! ON LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN: INVALID STRING, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                               finalColumn = 0;                                 
-                               break;
-                            case DECIMAL:
-                               finalColumn = finalColumn + lexer.yylength();
-                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+ lexer.yytext()+" TOKEN: DECIMAL, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                               finalColumn = 0;
-                            break;
-                            case EXPONENCIAL:
-                               finalColumn = lexer.column + lexer.yylength()-1;
-                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN: EXPONENCIAL, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                               finalColumn = 0;
-                            break;
-                            case ERRORSTRING:
-                               finalColumn = lexer.column + lexer.yylength()-1;
-                               lines.add("ERROR STRING! ON LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN:INVALID, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                               finalColumn = 0; 
-                            break;
-                               case STRING:
-                               finalColumn = lexer.column + lexer.yylength()-1;
-                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN: STRING, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                               finalColumn = 0;
-                            break;
-                               case BIT:
-                               finalColumn = lexer.column + lexer.yylength()-1;
-                               lines.add("LINE: "+ (lexer.line+1) +" FOUND: "+lexer.yytext()+" TOKEN: BIT, ON COLUMN: " +lexer.column+" TO: " + finalColumn );
-                               finalColumn = 0;
-                            break;
-                        }
-                    }                    
-                }while(true);
+               
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(view.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
@@ -351,6 +318,27 @@ public class view extends javax.swing.JFrame {
             Logger.getLogger(view.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+    // TODO add your handling code here:
+        sintax s = new sintax(new lexer.Cup_Flex(new StringReader(ST)));
+        jTextArea1.setText(null);
+        try {
+        s.parse();
+        erroresL = s.error;
+            if (erroresL.isEmpty()) {
+                jTextArea1.setText("Analisis realizado Existosamente.");
+                jTextArea1.setForeground(new Color(25,111,61));   
+            }else{
+                for (int i = 0; i < erroresL.size(); i++) {
+                    jTextArea1.append("Error de sintaxis en linea: " + (erroresL.get(i).getLinea())+ " Columna: " + (erroresL.get(i).getColumna()) + " Value: \" " + erroresL.get(i).getToken() + " \" \t\n");
+                    jTextArea1.setForeground(Color.red);
+                }
+            }
+
+        } catch (Exception e) {
+        }
+    }//GEN-LAST:event_jButton4ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -391,6 +379,9 @@ public class view extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea jTextArea1;
     // End of variables declaration//GEN-END:variables
 }
