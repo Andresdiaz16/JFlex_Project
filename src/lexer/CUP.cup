@@ -181,7 +181,7 @@ SELECT_F ::= 	SELECT ALL TOP_F SELECT_FILES INTO FROM_F WHERE_F GROUP_F ORDER_F 
 				/*SIN TOP*/				
 				SELECT ALL SELECT_FILES  FROM_F WHERE_F GROUP_F ORDER_F FIN | 
 				SELECT DISTINCT SELECT_FILES  FROM_F WHERE_F GROUP_F ORDER_F FIN | 
-				SELECT SELECT_FILES FROM_F WHERE_F GROUP_F ORDER_F FIN;
+				SELECT SELECT_FILES FROM_F WHERE_F GROUP_F ORDER_F FIN | SELECT error FIN;
 
 SELECT_FILES ::= Multiplicacion | OBJECT_F | OBJECT_F AS_F | SELECT_FUNCTIONS |OBJECT_F Coma SELECT_FILES|
                                 OBJECT_F AS_F Coma SELECT_FILES | SELECT_FUNCTIONS Coma SELECT_FILES|SELECT error;
@@ -211,7 +211,7 @@ OrderB ::= ASC | DESC ;
 
 /*CREATE STATEMENTS*/
 
-CREATE_F::= CREATE CreateA;
+CREATE_F::= CREATE CreateA | CREATE error FIN;
 
     CreateA ::= CreateTable | CreateDB | CreateIndex | CreateUser | CreateView | Procedure | Function;
 
@@ -349,48 +349,48 @@ SearchCondition ::= NOT Predicate SearchConditionA|Predicate SearchConditionA| P
 SearchConditionA ::= AND SearchCondition|OR SearchCondition|EMPTY_F ;
 
 /*ALTER STATEMENTS*/
-ALTERDATABASE ::=       ALTER DATABASE database_name alter_database_sentencia FIN ;
+ALTERDATABASE ::=       ALTER DATABASE database_name alter_database_sentencia FIN  | ALTER DATABASE error FIN ;
 database_name ::=       Identificador | CURRENT;
 alter_database_sentencia ::= MODIFY NAME Igual Identificador | COLLATE Identificador ;
 
 ALTERTABLE ::=          ALTER TABLE OBJECT_F alter_column alter_column_sentencia FIN | ALTER TABLE OBJECT_F alter_column FIN | ALTER TABLE OBJECT_F FIN | ALTER TABLE OBJECT_F ADD Identificador TIPODATO null_notnull FIN | ALTER TABLE OBJECT_F ADD Identificador TIPODATO null_notnull CONSTRAINT Identificador constraint_type FIN |
-                        ALTER TABLE OBJECT_F ADD CONSTRAINT Identificador FIN | ALTER TABLE OBJECT_F ADD CONSTRAINT Identificador constraint_type FIN | ALTER TABLE OBJECT_F DROP COLUMN Identificador FIN | ALTER TABLE OBJECT_F DROP Identificador FIN | ALTER TABLE OBJECT_F DROP CONSTRAINT Identificador FIN;
+                        ALTER TABLE OBJECT_F ADD CONSTRAINT Identificador FIN | ALTER TABLE OBJECT_F ADD CONSTRAINT Identificador constraint_type FIN | ALTER TABLE OBJECT_F DROP COLUMN Identificador FIN | ALTER TABLE OBJECT_F DROP Identificador FIN | ALTER TABLE OBJECT_F DROP CONSTRAINT Identificador FIN | ALTER TABLE error FIN;
 alter_column ::=        ALTER COLUMN Identificador;
 alter_column_sentencia ::= TIPODATO Identificador COLLATE Identificador NULL | TIPODATO Identificador COLLATE Identificador NOT NULL | TIPODATO Identificador COLLATE Identificador | COLLATE Identificador NULL | COLLATE Identificador NOT NULL | COLLATE Identificador | TIPODATO Identificador | NULL | NOT NULL;
 constraint_type ::=     PRIMARY KEY | UNIQUE | PRIMARY KEY CLUSTERED | PRIMARY KEY NONCLUSTERED | UNIQUE CLUSTERED | UNIQUE NONCLUSTERED | foreign_key;
 null_notnull ::=        NULL | NOT NULL;
 foreign_key ::=         FOREIGN KEY Parentesis_de_apertura Identificador Parentesis_de_cierre;
 
-ALTERUSER ::= ALTER USER Identificador FIN;
+ALTERUSER ::= ALTER USER Identificador FIN |  ALTER USER error FIN;
 
-ALTERINDEX ::= ALTER INDEX alter_index ON OBJECT_F FIN;
+ALTERINDEX ::= ALTER INDEX alter_index ON OBJECT_F FIN |  ALTER INDEX error FIN;
 alter_index ::= Identificador | ALL;
 
-ALTERVIEW ::= ALTER VIEW OBJECT_F AS SELECT_F FIN | ALTER VIEW OBJECT_F alter_view AS SELECT_F FIN;
+ALTERVIEW ::= ALTER VIEW OBJECT_F AS SELECT_F FIN | ALTER VIEW OBJECT_F alter_view AS SELECT_F FIN | ALTER VIEW error FIN;
 alter_view ::= Parentesis_de_apertura alter_column Parentesis_de_cierre ;
 
 /*DROP STATEMENTS*/
 DROPDATABASE ::=  DROP DATABASE OBJECT_FDROP FIN|
-                  DROP DATABASE Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_FDROP FIN;
+                  DROP DATABASE Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_FDROP FIN | DROP DATABASE error FIN;
 
 DROPTABLE ::= DROP TABLE OBJECT_FDROP FIN|
-              DROP TABLE Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_FDROP FIN;
+              DROP TABLE Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_FDROP FIN | DROP TABLE error FIN;
 
 DROPUSER ::= DROP USER Identificador FIN|
-             DROP USER Corchete_de_apertura IF EXISTS Corchete_de_cierre Identificador FIN;
+             DROP USER Corchete_de_apertura IF EXISTS Corchete_de_cierre Identificador FIN | DROP USER error FIN;
 
 DROPINDEX ::= DROP INDEX drop_relational_or_xml_or_spatial_index FIN|
               DROP INDEX Corchete_de_apertura IF EXISTS Corchete_de_cierre drop_relational_or_xml_or_spatial_index FIN|
               DROP INDEX OBJECT_F FIN|
-              DROP INDEX Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_F FIN;
+              DROP INDEX Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_F FIN | DROP INDEX error FIN;
 drop_relational_or_xml_or_spatial_index ::= Identificador ON OBJECT_F Coma Identificador ON OBJECT_F| Identificador ON OBJECT_F;
 
 DROPVIEW ::= DROP VIEW OBJECT_FDROP FIN|
-             DROP VIEW Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_FDROP FIN;
+             DROP VIEW Corchete_de_apertura IF EXISTS Corchete_de_cierre OBJECT_FDROP FIN | DROP VIEW error FIN;
 
 /*TRUNCATE*/
 
-TRUNCATETABLE ::= TRUNCATE TABLE OBJECT_F FIN;
+TRUNCATETABLE ::= TRUNCATE TABLE OBJECT_F FIN | TRUNCATE TABLE error FIN;
 
 
 /*FROM DECLARATION*/
@@ -430,18 +430,18 @@ signos ::= IS NOT NULL |Igual | Mayor | Menor | Diferente | Menor_o_igual | Mayo
 and_or_not ::= AND | OR | NOT | AND NOT | OR NOT;
 
 /*TRANSACTION*/
-BEGINTRANSACTION ::= BEGIN TRANSACTION OBJECT_F FIN | BEGIN TRAN OBJECT_F FIN | BEGIN OBJECT_F FIN | BEGIN TRAN FIN ;
+BEGINTRANSACTION ::= BEGIN TRANSACTION OBJECT_F FIN | BEGIN TRAN OBJECT_F FIN | BEGIN OBJECT_F FIN | BEGIN TRAN FIN | BEGIN error FIN ;
 
-COMMITTCL ::= COMMIT TRANSACTION OBJECT_F FIN | COMMIT TRAN OBJECT_F FIN | COMMIT OBJECT_F FIN | COMMIT TRAN FIN;
+COMMITTCL ::= COMMIT TRANSACTION OBJECT_F FIN | COMMIT TRAN OBJECT_F FIN | COMMIT OBJECT_F FIN | COMMIT TRAN FIN | COMMIT error FIN;
 
-SAVEPOINTTCL ::= SAVEPOINT OBJECT_F FIN;
+SAVEPOINTTCL ::= SAVEPOINT OBJECT_F FIN | SAVEPOINT error FIN;
 
-ROLLBACKTCL ::= ROLLBACK TRANSACTION OBJECT_F FIN | ROLLBACK TRAN OBJECT_F FIN;
+ROLLBACKTCL ::= ROLLBACK TRANSACTION OBJECT_F FIN | ROLLBACK TRAN OBJECT_F FIN| ROLLBACK error FIN;
 
 
 /*CURSORES*/
 
-    CursorDeclare ::= DECLARE OBJECT_F CURSOR CursorDeclarea CursorDeclareb CursorDeclarec CursorDeclared CursorDeclaree FOR SELECT_F CursorDeclaref;
+    CursorDeclare ::= DECLARE OBJECT_F CURSOR CursorDeclarea CursorDeclareb CursorDeclarec CursorDeclared CursorDeclaree FOR SELECT_F CursorDeclaref | DECLARE error FIN;
     
     CursorDeclarea ::= LOCAL|GLOBAL|EMPTY_F;
     
